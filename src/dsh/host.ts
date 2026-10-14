@@ -11,13 +11,14 @@ import {resolveConfig,type Config} from '../core/config.js';
 import {hash} from '../core/util.js';
 import {invariant} from '../core/errors.js';
 import {DshFileAdapter} from './fs.js';
+import {OfficeRenderer} from './render.js';
 import {DshModelAdapter} from './model.js';
 import {assertCompatibility} from './compatibility.js';
 declare module '@deepseek-ai/cordis' {interface Context {longContext:LongContextHub;}}
 export class LongContextHub extends Service {
   static inject=['fs','llm'];
-  static Config=z.object({stateRoot:z.string().default('.dsh-long-context'),mode:z.union(['strict','advisory']).default('strict'),
-    blockTargetCodePoints:z.number(),blockMaxCodePoints:z.number(),maxInputBytes:z.number(),maxToolResultCodePoints:z.number(),maxCheckpointCodePoints:z.number(),
+  static Config=z.object({rendererExecutable:z.string(),rendererFontconfigFile:z.string(),auxiliaryModel:z.object({provider:z.string(),model:z.string(),reasoningEffort:z.string(),maxOutputTokens:z.number(),deadlineMs:z.number()}),stateRoot:z.string().default('.dsh-long-context'),mode:z.union(['strict','advisory']).default('strict'),
+    maxEvidenceCodePoints:z.number(),blockTargetCodePoints:z.number(),blockMaxCodePoints:z.number(),maxInputBytes:z.number(),maxToolResultCodePoints:z.number(),maxCheckpointCodePoints:z.number(),
     deadlineMs:z.number(),retries:z.number(),maxCalls:z.number(),maxTokens:z.number(),maxWallMs:z.number(),maxOutputTokens:z.number(),maxCorrections:z.number(),semanticVerification:z.boolean()});
   readonly config:Config;
   private readonly hostContext:Context;
@@ -36,8 +37,8 @@ export class LongContextHub extends Service {
       invariant(ctx.fs.contains(target,stateTarget),'LC_PERMISSION_DENIED','State root escapes workspace');
       // State is private plugin storage inside the authorized workspace, independent from paper filesystem effects.
       const s=new LocalRecordStore(root,workspaceId);await s.init();return s;})();this.stores.set(workspaceId,store);store.catch(()=>this.stores.delete(workspaceId));}
-    return new LongContextEngine({store:await store,files:new DshFileAdapter(ctx,agent,this.config.maxInputBytes),model:new DshModelAdapter(ctx,agent,this.config.maxOutputTokens),
-      identity:{workspaceId,sessionId:agent.session.id},config:{...this.config,maxToolResultCodePoints:resultBudget-500}});
+    return new LongContextEngine({store:await store,files:new DshFileAdapter(ctx,agent,this.config.maxInputBytes,this.config.stateRoot),model:new DshModelAdapter(ctx,agent,this.config.maxOutputTokens,this.config.auxiliaryModel),
+      renderer:this.config.rendererExecutable?new OfficeRenderer(this.config.rendererExecutable,(await store).root,this.config.rendererFontconfigFile):undefined,identity:{workspaceId,sessionId:agent.session.id},config:{...this.config,maxToolResultCodePoints:resultBudget-500}});
   }
 }
 export default LongContextHub;

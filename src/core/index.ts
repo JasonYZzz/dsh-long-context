@@ -10,3 +10,7 @@ export * from './changes/index.js';
 export * from './verification/index.js';
 export * from './context/index.js';
 export * from './engine.js';
+export * from './ledger/migrate.js';
+export * from './workflows/types.js';
+export * from './workflows/research.js';
+export * from './workflows/engine.js';

@@ -7,3 +7,6 @@ dist/
 coverage/
 evaluation/runs/
 tests/fixtures/generated/
+.impeccable/review/
+.impeccable/detector-web.json
+.idea/

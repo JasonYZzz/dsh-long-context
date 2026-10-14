@@ -1,0 +1,18 @@
+{
+  "web-workbench.png": {
+    "kind": "native-browser-screenshot",
+    "date": "2026-10-14",
+    "source": "http://127.0.0.1:3080/",
+    "method": "CUA screenshot clipped to the visible native workbench dialog",
+    "content": "Synthetic exact replacement acceptance task, restored after service restart",
+    "generated": false
+  },
+  "web-installed.png": {
+    "kind": "native-browser-screenshot",
+    "date": "2026-10-14",
+    "source": "http://127.0.0.1:3080/",
+    "method": "CUA full-page screenshot of the native plugin detail view",
+    "content": "dsh-long-context version and three running components",
+    "generated": false
+  }
+}

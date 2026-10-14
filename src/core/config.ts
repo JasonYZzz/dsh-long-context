@@ -1,7 +1,11 @@
 import {z} from 'zod';
+export const auxiliaryModelSchema=z.object({provider:z.string().min(1).optional(),model:z.string().min(1).optional(),reasoningEffort:z.string().min(1).optional(),maxOutputTokens:z.number().int().positive().optional(),deadlineMs:z.number().int().min(100).max(300000).optional()}).strict();
 export const configSchema=z.object({
+  rendererExecutable:z.string().min(1).optional(),rendererFontconfigFile:z.string().min(1).optional(),
+  auxiliaryModel:auxiliaryModelSchema.default({}),
   stateRoot:z.string().min(1).default('.dsh-long-context'), mode:z.enum(['strict','advisory']).default('strict'),
   blockTargetCodePoints:z.number().int().min(128).max(6000).default(4000), blockMaxCodePoints:z.number().int().min(128).max(12000).default(6000),
+  maxEvidenceCodePoints:z.number().int().min(1000).max(100000).default(48000),
   maxInputBytes:z.number().int().positive().max(100_000_000).default(20_000_000),
   maxToolResultCodePoints:z.number().int().min(1000).max(7000).default(7000),
   maxCheckpointCodePoints:z.number().int().min(1000).max(4500).default(4500),

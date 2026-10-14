@@ -2,8 +2,9 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {join} from 'node:path';
 import assert from 'node:assert/strict';
 import {load} from 'js-yaml';
-import {SessionId} from '@deepseek-ai/dsh-session';
-import {ToolCallId,createUserMessage} from '@deepseek-ai/dsh-llm';
+import {dshImport} from './runtime.mjs';
+const {SessionId}=await dshImport('@deepseek-ai/dsh-session');
+const {ToolCallId,createUserMessage}=await dshImport('@deepseek-ai/dsh-llm');
 import {boot,workspace,project,record} from './runtime.mjs';
 import {AcceptanceAdapter} from './fake-adapter.mjs';
 const runId=Date.now();
@@ -31,6 +32,7 @@ try{
   const conversation=adapter.calls.slice(first).filter(c=>c.purpose==='conversation');assert.ok(conversation.length>0);
   assert.ok(conversation.every(c=>JSON.stringify(c.messages).includes(taskId)),'pre-step checkpoint absent from a real request');
   const engine=await ctx.longContext.engine(agent.ctx,agent),checkpoint=await engine.buildCheckpoint(taskId);
+  const privateRead=await agent.ctx.tools.execute({callId:ToolCallId('private-ledger-denied'),name:'lc_import',arguments:{path:join(engine.store.root,'manifest.json'),format:'txt'},agent,signal:controller.signal});assert.equal(privateRead.isError,true);assert.equal(privateRead.error.info.code,'LC_PERMISSION_DENIED');
   const compaction=ctx.agentPresets.serviceFor(agent,'compaction');assert.ok(compaction);
   const manual=await compaction.compactNow(agent,controller.signal);assert.ok(manual,'manual compaction did not replace a region');
   assert.ok(agent.session.deriveMessages().some(m=>m.content.some(b=>b.type==='text'&&b.text.includes(checkpoint))),'checkpoint missing from actual replacement summary');
@@ -57,8 +59,11 @@ try{
   const finished=await tool('lc_finish',{...await command(),candidateRevisionId:applied.candidate.candidateRevisionId});assert.equal(finished.state,'completed_with_checks');
   assert.ok((await readFile(applied.candidate.path,'utf8')).includes('当前阈值为20。'));assert.ok((await readFile(file,'utf8')).includes('当前阈值为10。'));
   await tool('lc_export_report',{...await command(),format:'json',outputPath:join(workspace,`report-${runId}.json`)});
+  const generation=await create('generation');const flow=await tool('lc_generate_start',{goal:{title:'Controlled context recovery',outline:Array.from({length:30},(_,i)=>`Unit ${i+1}`),pages:30,revisionIds:[imported.revisionId]},requestId:'generation-start',expectedLedgerRevision:0},generation);
+  const flowCommand=async()=>({taskId:flow.taskId,requestId:`flow-${++seq}`,expectedLedgerRevision:(await tool('lc_status',{taskId:flow.taskId},generation)).journalRevision});
+  await tool('lc_generate_next',await flowCommand(),generation);await speak('Controlled generation history '+ 'previous chapter history '.repeat(12000),generation);const generationCompactor=ctx.agentPresets.serviceFor(generation,'compaction');assert.ok(await generationCompactor.compactNow(generation,controller.signal));assert.ok(generation.session.deriveMessages().some(m=>m.content.some(b=>b.type==='text'&&b.text.includes(flow.taskId))));const flowIndex=adapter.calls.length;await speak('Continue the generation task after manual compaction.',generation);assert.ok(adapter.calls.slice(flowIndex).filter(c=>c.purpose==='conversation').every(c=>JSON.stringify(c.messages).includes(flow.taskId)));await tool('lc_generate_next',await flowCommand(),generation);assert.equal((await tool('lc_status',{taskId:flow.taskId},generation)).total,2);
   const report=await record('mechanisms',{verdict:'passed',layer:'L2-controlled-provider',ids:['DOC-01/02/03','ENV-02','EDIT-04','CTX-01','CTX-02','CTX-03','CTX-04-controlled','STOP-01'],
-    manual:!!manual,overflowSummaries:overflowCalls.filter(c=>c.purpose==='compaction').length,pressureSummaries:pressureCalls.filter(c=>c.purpose==='compaction').length,
+    generationCheckpoint:true,generationUnitsAfterCompaction:2,manual:!!manual,overflowSummaries:overflowCalls.filter(c=>c.purpose==='compaction').length,pressureSummaries:pressureCalls.filter(c=>c.purpose==='compaction').length,
     requestCount:adapter.calls.length,taskId,checkpoint,liveProviderOverflow:'not-run',semanticQuality:'not-evaluated'});
   // Full synthetic request envelopes are local reproducibility evidence, never user conversations.
   await writeFile(join(report,'requests.json'),JSON.stringify(adapter.calls,null,2));

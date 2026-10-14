@@ -27,15 +27,15 @@ export function chunk(text:string,revisionId:string,config:Config):Block[] {
   }
   return blocks;
 }
-export function anchor(document:DocumentRevision,text:string,blockId:string,start:number,end:number):Anchor {
+export function anchor(document:DocumentRevision,text:string|readonly string[],blockId:string,start:number,end:number):Anchor {
   const block=document.blocks.find(b=>b.blockId===blockId);
-  invariant(block&&Number.isInteger(start)&&Number.isInteger(end)&&start>=block.start&&end<=block.end&&end>=start,'LC_EVIDENCE_MISMATCH','Range lies outside its source block',blockId);
-  return {revisionId:document.revisionId,blockId,start,end,textHash:hash(slice(text,start,end))};
+  invariant(block&&Number.isInteger(start)&&Number.isInteger(end)&&start>=block.start&&start<block.end&&end<=document.length&&end>=start,'LC_EVIDENCE_MISMATCH','Range lies outside its document or starting block',blockId);
+  return {revisionId:document.revisionId,start,end,textHash:hash(slice(text,start,end))};
 }
-export function validateAnchor(document:DocumentRevision,text:string,a:Anchor,quote?:string):void {
+export function validateAnchor(document:DocumentRevision,text:string|readonly string[],a:Anchor,quote?:string):void {
   invariant(a.revisionId===document.revisionId,'LC_STALE_REVISION','Anchor belongs to another revision');
-  const actual=anchor(document,text,a.blockId,a.start,a.end);
-  invariant(actual.textHash===a.textHash&&(quote===undefined||slice(text,a.start,a.end)===quote),'LC_EVIDENCE_MISMATCH','Evidence must match the exact source range',a.blockId);
+  const block=anchorBlock(document,a);const actual=anchor(document,text,block.blockId,a.start,a.end);
+  invariant(actual.textHash===a.textHash&&(quote===undefined||slice(text,a.start,a.end)===quote),'LC_EVIDENCE_MISMATCH','Evidence must match the exact source range',block.blockId);
 }
 interface Cursor {revisionId:string;blockId:string;start:number;end:number;position:number;}
 export function readRange(document:DocumentRevision,text:string,input:{blockId:string;start?:number;end?:number;cursor?:string},budget:number):ReadPage {
@@ -61,8 +61,13 @@ export function readRange(document:DocumentRevision,text:string,input:{blockId:s
 }
 export function locateQuote(document:DocumentRevision,text:string,blockId:string,quote:string,relativeStart?:number):Anchor {
   const block=document.blocks.find(b=>b.blockId===blockId);invariant(block,'LC_EVIDENCE_MISMATCH','Unknown block');
-  const content=slice(text,block.start,block.end);
+  const content=slice(text,block.start,Math.min(document.length,block.end+length(quote)-1));
   if(relativeStart!==undefined){const start=block.start+relativeStart;const a=anchor(document,text,blockId,start,start+length(quote));validateAnchor(document,text,a,quote);return a;}
   const first=content.indexOf(quote);invariant(first>=0&&content.indexOf(quote,first+1)<0,'LC_EVIDENCE_MISMATCH','Quote missing or ambiguous; supply a Unicode start offset');
   const start=block.start+length(content.slice(0,first));return anchor(document,text,blockId,start,start+length(quote));
+}
+
+export function anchorBlock(document:DocumentRevision,a:Anchor):Block {
+  const block=document.blocks.find(b=>b.start<=a.start&&a.start<b.end);
+  invariant(block&&a.revisionId===document.revisionId,'LC_EVIDENCE_MISMATCH','Anchor has no valid starting block');return block;
 }

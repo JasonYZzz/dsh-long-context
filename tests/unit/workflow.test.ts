@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {harness,FakeModel} from '../helpers.js';
-import {LongContextEngine,LocalRecordStore,checkpoint,hash,locateQuote,makePlan} from '../../src/core/index.js';
+import {LongContextEngine,LocalRecordStore,checkpoint,hash,canonical,locateQuote,makePlan,structuralIssues,applyPlan} from '../../src/core/index.js';
 describe('evidence-bound editing workflow',()=>{
   it('preserves original, applies all changes, verifies and finishes after restart',async()=>{const h=await harness();try{
     const candidate=await h.candidate();expect(Buffer.from(await h.files.read('paper.md')).toString()).toContain('当前阈值为10。');expect(Buffer.from(await h.files.read('candidate.md')).toString()).toBe('当前阈值为20。\n历史研究的阈值为10。\n');
@@ -15,7 +15,7 @@ describe('evidence-bound editing workflow',()=>{
     await expect(h.engine.plan(h.taskId,await h.command())).rejects.toMatchObject({code:'LC_COVERAGE_INCOMPLETE'});expect((await h.store.task(h.taskId))!.reviewed).toEqual([]);
   }finally{await h.cleanup();}});
   it('keeps failed schema/evidence pending and enforces bounded retries',async()=>{const h=await harness(undefined,{retries:2},new FakeModel(()=>JSON.stringify({impacts:[{quote:'fabricated',decision:'change',rationale:'bad',claimId:'x',replacement:'x'}],aliases:[],dependencies:[],needsEvidence:[]})));try{
-    await h.engine.scanNext(h.taskId,await h.command());const task=(await h.store.task(h.taskId))!;expect(task.state).toBe('needs_attention');expect(task.reviewed).toEqual([]);expect(task.audits).toHaveLength(3);expect(h.model.calls).toBe(3);
+    await h.engine.scanNext(h.taskId,await h.command());const task=(await h.store.task(h.taskId))!;expect(task.state).toBe('needs_attention');expect(task.reviewed).toEqual([]);expect(task.audits).toHaveLength(2);expect(h.model.calls).toBe(2);
     expect(await h.store.getObject(task.audits[0]!.inputHash)).toContain('当前阈值为10。');expect(await h.store.getObject(task.audits[0]!.outputHash)).toContain('fabricated');
   }finally{await h.cleanup();}});
   it('reuses the exact result without repeating model calls or candidate writes',async()=>{const h=await harness();try{
@@ -30,7 +30,7 @@ describe('evidence-bound editing workflow',()=>{
     h.files.failCreate=false;await h.engine.apply(h.taskId,command,input);expect(h.files.writes).toBe(1);expect((await h.store.task(h.taskId))!.candidate!.status).toBe('committed');
   }finally{await h.cleanup();}});
   it('makes old plans/checks stale after external source/candidate modification',async()=>{const h=await harness();try{
-    const c=await h.candidate();await h.engine.verify(h.taskId,await h.command(),{candidateRevisionId:c.candidateRevisionId});h.files.seed('candidate.md','tampered');
+    const c=await h.candidate();await h.engine.verify(h.taskId,await h.command(),{candidateRevisionId:c.candidateRevisionId});h.files.seed('candidate.md','tampered');expect((await h.engine.status(h.taskId)).freshness).toBe('stale');
     await expect(h.engine.finish(h.taskId,await h.command(),c.candidateRevisionId)).rejects.toMatchObject({code:'LC_STALE_REVISION'});expect((await h.store.task(h.taskId))!.checks).toEqual([]);expect((await h.store.task(h.taskId))!.state).toBe('stale');
   }finally{await h.cleanup();}});
   it('rejects protected/overlapping patches before any output write',async()=>{const h=await harness();try{
@@ -69,3 +69,44 @@ it('can revise a failed candidate while retaining prior candidate history',async
   await h.engine.apply(h.taskId,await h.command(),{planId:task.plan!.planId,outputPath:'candidate-v2.md'});expect(Buffer.from(await h.files.read('candidate-v2.md')).toString()).toContain('20个单位');
   expect(Buffer.from(await h.files.read('candidate.md')).toString()).toContain('当前阈值为20。');
 }finally{await h.cleanup();}});
+it('rejects a zero-change semantic edit even when both model passes miss the request',async()=>{
+  const model=new FakeModel(input=>JSON.stringify(input.includes('WHOLE block')?{impacts:[],aliases:[],dependencies:[],needsEvidence:[]}:{passed:true,issues:[],evidence:['当前阈值为10。']}));
+  const h=await harness(undefined,{},model);try{const c=await h.candidate();await h.engine.verify(h.taskId,await h.command(),{candidateRevisionId:c.candidateRevisionId});
+    await expect(h.engine.finish(h.taskId,await h.command(),c.candidateRevisionId)).rejects.toMatchObject({code:'LC_VERIFICATION_FAILED'});
+  }finally{await h.cleanup();}
+});
+it('provides the exact schema validation error to a bounded corrective attempt',async()=>{
+  const inputs:string[]=[];const model=new FakeModel((input,call)=>{inputs.push(input);return JSON.stringify({impacts:[{quote:'当前阈值为10。',decision:'keep',rationale:'Preserve source',claimId:call===1?null:'threshold',replacement:null}],aliases:[],dependencies:[],needsEvidence:[]});});
+  const h=await harness(undefined,{},model);try{await h.engine.scanNext(h.taskId,await h.command());expect(model.calls).toBe(2);expect(inputs[1]).toContain('claimId');expect(inputs[1]).toContain('Previous attempt failed validation');expect((await h.store.task(h.taskId))!.reviewed).toHaveLength(1);
+  }finally{await h.cleanup();}
+});
+it('applies an explicit cross-block exact goal even when the scanner finds no impacts',async()=>{
+  const h=await harness('x'.repeat(3996)+'DualPipe'+'y'.repeat(4200),{},new FakeModel(()=>{throw new Error('Exact goal must not require model interpretation');}));
+  try{await h.engine.resume(h.taskId,await h.command(),{cancel:true});const t=await h.engine.start({revisionId:h.doc.revisionId,request:'Rename every exact occurrence',taskType:'exact',exactReplacements:[{from:'DualPipe',to:'DualPipe-Eval'}]},{requestId:'exact-start',expectedLedgerRevision:0}) as {taskId:string};
+    let seq=0;const cmd=async()=>({requestId:`exact-${++seq}`,expectedLedgerRevision:(await h.store.task(t.taskId))!.journalRevision});
+    while((await h.store.task(t.taskId))!.state==='scanning')await h.engine.scanNext(t.taskId,await cmd());
+    await h.engine.plan(t.taskId,await cmd());let task=(await h.store.task(t.taskId))!;await h.engine.apply(t.taskId,await cmd(),{planId:task.plan!.planId,outputPath:'exact.md'});task=(await h.store.task(t.taskId))!;
+    for(const b of h.doc.blocks)await h.engine.verify(t.taskId,await cmd(),{candidateRevisionId:task.candidate!.candidateRevisionId,blockId:b.blockId});
+    await h.engine.finish(t.taskId,await cmd(),task.candidate!.candidateRevisionId);expect(Buffer.from(await h.files.read('exact.md')).toString()).toBe('x'.repeat(3996)+'DualPipe-Eval'+'y'.repeat(4200));
+  }finally{await h.cleanup();}
+});
+it('keeps an early definition visible after more than twenty intervening claims',async()=>{
+  const inputs:string[]=[];const model=new FakeModel(input=>{inputs.push(input);const p=JSON.parse(input.split('Input:\n')[1]!);return JSON.stringify({impacts:[0,100,200].map(start=>({quote:Array.from(p.block.text).slice(start,start+80).join(''),start,decision:'keep',rationale:'Keep evidence',claimId:`c-${inputs.length}-${start}`,replacement:null})),aliases:[],dependencies:[],needsEvidence:[]});});
+  const text=Array.from({length:30},(_,i)=>`# Chapter ${i+1}\n`+(i===0?'ROOT-DEFINITION: code Q7 means threshold ten.\n':i===29?'LATE-REFERENCE: use Q7 from chapter one.\n':'')+'正文保留。'.repeat(250)+'\n\f').join(''),h=await harness(text,{},model);
+  try{await h.scanAll();const late=inputs.find(p=>p.includes('LATE-REFERENCE'))!;const p=JSON.parse(late.split('Input:\n')[1]!);expect(p.definitions.some((d:{text:string})=>d.text.includes('ROOT-DEFINITION'))).toBe(true);expect((await h.store.task(h.taskId))!.impacts.length).toBeGreaterThan(20);
+  }finally{await h.cleanup();}
+});
+
+it('checks exact goals independently even if reviewed rule replacements are altered',async()=>{
+  const h=await harness();try{await h.engine.resume(h.taskId,await h.command(),{cancel:true});const result=await h.engine.start({revisionId:h.doc.revisionId,request:'Rename 10 to 20',taskType:'exact',exactReplacements:[{from:'10',to:'20'}]},{requestId:'exact-independent',expectedLedgerRevision:0}) as {taskId:string};const task=(await h.store.task(result.taskId))!,text=await h.store.getObject(h.doc.textHash);for(const item of task.impacts)item.replacement='99';task.plan=makePlan(task,h.doc,text,{});expect(structuralIssues(task,h.doc,text,applyPlan(task.plan,h.doc,text))).toContain('Candidate does not match the independent exact-replacement goal');
+  }finally{await h.cleanup();}
+});
+it('applies and checks a user-specified paragraph before accepting related edits',async()=>{
+  const h=await harness('根段落：阈值为10。\n后文引用阈值。');try{await h.engine.resume(h.taskId,await h.command(),{cancel:true});const text=await h.store.getObject(h.doc.textHash),a=locateQuote(h.doc,text,h.doc.blocks[0]!.blockId,'根段落：阈值为10。'),r=await h.engine.start({revisionId:h.doc.revisionId,request:'Update definition and related content',rootChanges:[{anchor:a,replacement:'根段落：阈值为20。'}]},{requestId:'root',expectedLedgerRevision:0}) as {taskId:string},task=(await h.store.task(r.taskId))!;task.plan=makePlan(task,h.doc,text,{});expect(structuralIssues(task,h.doc,text,applyPlan(task.plan,h.doc,text))).toEqual([]);task.impacts[0]!.replacement='根段落：阈值为30。';task.plan=makePlan(task,h.doc,text,{});expect(structuralIssues(task,h.doc,text,applyPlan(task.plan,h.doc,text))).toContain('User-specified root edit is missing or differs from its goal');
+  }finally{await h.cleanup();}
+});
+
+it('applies thousands of length-changing Unicode patches without changing other text',async()=>{
+ const text='😀甲旧🚀保留。\n'.repeat(1500),h=await harness(text);try{await h.engine.resume(h.taskId,await h.command(),{cancel:true});const s=await h.engine.start({revisionId:h.doc.revisionId,request:'Exact Unicode update',taskType:'exact',exactReplacements:[{from:'旧🚀',to:'新😀更长'}]},{requestId:'unicode-exact',expectedLedgerRevision:0}) as {taskId:string};const task=(await h.store.task(s.taskId))!,plan=makePlan(task,h.doc,text,{}),candidate=applyPlan(plan,h.doc,text);expect(plan.patches).toHaveLength(1500);expect(candidate).toBe(text.split('旧🚀').join('新😀更长'));task.plan=plan;expect(structuralIssues(task,h.doc,text,candidate)).toEqual([]);const reversed={...plan,patches:plan.patches.toReversed()};const {hash:_hash,...body}=reversed;reversed.hash=hash(canonical(body));expect(()=>applyPlan(reversed,h.doc,text)).toThrow(/ordered/);
+ }finally{await h.cleanup();}
+});

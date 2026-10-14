@@ -1,18 +1,18 @@
 {
   "name": "dsh-long-context",
-  "version": "0.1.0",
-  "description": "Persistent, evidence-bound long document editing for DSH rc.2",
+  "version": "0.3.0-beta.1",
+  "description": "DSH Web workspace for evidence-bound long-document editing, literature screening and chapter-aware generation",
   "type": "module",
   "license": "MIT",
   "packageManager": "pnpm@11.1.2",
   "engines": {
-    "node": ">=22.12.0",
+    "node": ">=22.13.0",
     "dsh": "0.2.0-rc.2"
   },
   "exports": {
     ".": {
-      "types": "./dist/dsh/agent.d.ts",
-      "import": "./dist/dsh/agent.js"
+      "types": "./dist/dsh/web.d.ts",
+      "import": "./dist/dsh/web.js"
     },
     "./core": {
       "types": "./dist/core/index.d.ts",
@@ -32,7 +32,12 @@
     },
     "./bundle": "./bundle/host.patch.yml",
     "./bundle/*": "./bundle/*",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./web": {
+      "types": "./dist/dsh/web.d.ts",
+      "import": "./dist/dsh/web.js"
+    },
+    "./client": "./client/index.js"
   },
   "files": [
     "dist",
@@ -40,14 +45,24 @@
     "docs",
     "README.md",
     "LICENSE",
-    "CONTEXT.md"
+    "CONTEXT.md",
+    "client",
+    "screenshots.json"
   ],
   "dsh": {
     "manifestVersion": 1,
     "bundle": {
       "patch": [
         "./bundle/host.patch.yml",
-        "./bundle/long-context.preset.patch.yml"
+        "./bundle/long-context.preset.patch.yml",
+        "./bundle/web.patch.yml"
+      ]
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-primitives"
       ]
     }
   },
@@ -65,33 +80,70 @@
     "evaluate:fixtures": "node scripts/generate-fixtures.mjs",
     "evaluate:gold": "node scripts/score-evaluation.mjs",
     "evaluate:report": "node scripts/export-report.mjs",
-    "acceptance:mechanisms:rc2": "node scripts/acceptance-mechanisms.mjs"
+    "acceptance:mechanisms:rc2": "node scripts/acceptance-mechanisms.mjs",
+    "evaluate:model-calibration": "node scripts/evaluate-model-calibration.mjs",
+    "acceptance:edit": "node scripts/acceptance-edit.mjs",
+    "acceptance:research": "node scripts/acceptance-research.mjs",
+    "acceptance:generation": "node scripts/acceptance-generation.mjs",
+    "acceptance:generation:controlled": "node scripts/acceptance-generation-controlled.mjs",
+    "migrate:state": "node scripts/migrate-state.mjs",
+    "acceptance:pdf": "node scripts/acceptance-pdf.mjs",
+    "evaluate:performance": "node scripts/evaluate-performance.mjs",
+    "evaluate:relevance": "node scripts/evaluate-relevance.mjs",
+    "evaluate:optimization-report": "node scripts/export-optimization-evidence.mjs"
   },
   "dependencies": {
+    "pdfjs-dist": "6.4.299",
     "zod": "4.1.12"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "4.0.4",
-    "@deepseek-ai/schemastery": "3.18.4",
     "@deepseek-ai/dsh-agent": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-agent-preset-registry": "0.2.0-rc.2",
     "@deepseek-ai/dsh-compaction-basic": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-compaction-tool-result-pruner": "0.2.0-rc.2",
     "@deepseek-ai/dsh-fs": "0.2.0-rc.2",
     "@deepseek-ai/dsh-llm": "0.2.0-rc.2",
-    "@deepseek-ai/dsh-tools": "0.2.0-rc.2",
-    "@deepseek-ai/dsh-system-prompt": "0.2.0-rc.2",
-    "@deepseek-ai/dsh-session": "0.2.0-rc.2",
     "@deepseek-ai/dsh-sandbox-policy": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-session": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-tools": "0.2.0-rc.2",
     "@deepseek-ai/dsh-util-values": "0.2.0-rc.2",
-    "@deepseek-ai/dsh-agent-preset-registry": "0.2.0-rc.2",
-    "@deepseek-ai/dsh-compaction-tool-result-pruner": "0.2.0-rc.2"
+    "@deepseek-ai/schemastery": "3.18.4",
+    "@deepseek-ai/dsh-client-connection": "0.2.0-rc.2"
   },
   "devDependencies": {
     "@deepseek-ai/dsh": "0.2.0-rc.2",
     "@types/node": "22.18.0",
-    "typescript": "5.9.3",
-    "vitest": "3.2.4",
     "eslint": "9.39.1",
+    "js-yaml": "4.1.1",
+    "typescript": "5.9.3",
     "typescript-eslint": "8.46.4",
-    "js-yaml": "4.1.1"
+    "vitest": "3.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JasonYZzz/dsh-long-context.git"
+  },
+  "homepage": "https://github.com/JasonYZzz/dsh-long-context#readme",
+  "bugs": {
+    "url": "https://github.com/JasonYZzz/dsh-long-context/issues"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "long-context",
+    "document-editing",
+    "research",
+    "web"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-client-connection": {
+      "optional": true
+    }
   }
 }

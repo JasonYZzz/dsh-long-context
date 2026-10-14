@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-14T10:04:45.696700Z",
+  "title": "Design System: DSH Long Context Web",
+  "extensions": {
+    "colorMeta": {
+      "label-primary": {
+        "role": "primary",
+        "displayName": "主要文字"
+      },
+      "label-secondary": {
+        "role": "neutral",
+        "displayName": "次级文字"
+      },
+      "border-l2": {
+        "role": "neutral",
+        "displayName": "内容分隔"
+      },
+      "bg-module-platform": {
+        "role": "neutral",
+        "displayName": "模块底面"
+      },
+      "bg-overlay": {
+        "role": "neutral",
+        "displayName": "选择背景"
+      },
+      "state-error-primary": {
+        "role": "primary",
+        "displayName": "错误文字"
+      },
+      "bg-layer-2": {
+        "role": "neutral",
+        "displayName": "原生 Modal 层面"
+      },
+      "bg-layer-3": {
+        "role": "neutral",
+        "displayName": "原生选中标签层面"
+      },
+      "border-l3": {
+        "role": "neutral",
+        "displayName": "原生选中标签边框"
+      },
+      "interactive-bg-hover": {
+        "role": "neutral",
+        "displayName": "原生悬停背景"
+      },
+      "interactive-bg-active": {
+        "role": "neutral",
+        "displayName": "原生按下背景"
+      }
+    },
+    "typographyMeta": {
+      "body": {
+        "displayName": "系统正文",
+        "purpose": "字段标签、说明、状态与任务内容。"
+      },
+      "metadata": {
+        "displayName": "次级元数据",
+        "purpose": "版本、文件属性、限制与计数。"
+      },
+      "task-title": {
+        "displayName": "任务目标",
+        "purpose": "与正文同级字号，以加重区分。"
+      },
+      "result-code": {
+        "displayName": "等宽结果",
+        "purpose": "保留返回数据的换行与对齐。"
+      },
+      "modal-title": {
+        "displayName": "原生 Modal 标题",
+        "purpose": "继承宿主字体的工作台标题。"
+      },
+      "control": {
+        "displayName": "原生 medium Button",
+        "purpose": "正文操作。"
+      },
+      "compact-control": {
+        "displayName": "原生 small Button",
+        "purpose": "会话标题入口。"
+      },
+      "tab": {
+        "displayName": "原生流程标签",
+        "purpose": "流程导航，选中项由原生组件加重。"
+      }
+    },
+    "shadows": [
+      {
+        "name": "native-modal-prominent",
+        "value": "var(--dsw-elevation-prominent)",
+        "purpose": "继承原生 Modal；具体阴影随宿主主题变化。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "native-modal-enter",
+        "value": "modalEnter var(--ds-transition-duration) var(--ds-ease-in-out)",
+        "purpose": "原生 Modal 与遮罩透明度进入，减弱动态时取消。"
+      },
+      {
+        "name": "native-tab-indicator",
+        "value": "transform 180ms ease",
+        "purpose": "原生流程选中指示器，减弱动态时取消。"
+      },
+      {
+        "name": "native-tab-text",
+        "value": "color 180ms ease",
+        "purpose": "原生流程文字状态，减弱动态时取消。"
+      },
+      {
+        "name": "result-arrive",
+        "value": "lc-arrive .16s ease-out",
+        "purpose": "局部结果由 opacity .65 进入 1，仅 prefers-reduced-motion:no-preference 启用。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-panel",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "原生工作台入口",
+      "kind": "button",
+      "refersTo": "button-ghost-sm",
+      "description": "继承原生 small ghost Button；字体与入口焦点由宿主负责。",
+      "html": "<button type=\"button\" class=\"ds-button ds-button-sm\" aria-label=\"长文工作台\">长文工作台</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:none;border-radius:var(--dsw-radius-md);cursor:pointer;font-family:inherit;font-size:14px;line-height:22px;color:var(--dsw-alias-label-primary);background:transparent;padding:0 14px;height:36px}.ds-button:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}.ds-button:active:not(:disabled){background:var(--dsw-alias-interactive-bg-active)}.ds-button:disabled{cursor:not-allowed;opacity:.4}.ds-button-sm{height:28px;font-size:12px;line-height:18px;padding:0 10px;border-radius:var(--dsw-radius-sm)}"
+    },
+    {
+      "name": "正文操作按钮",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "原生默认 medium ghost Button，叠加面板正文的键盘焦点轮廓。",
+      "html": "<div class=\"ds-body\"><button type=\"button\" class=\"ds-button\">刷新状态</button></div>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:none;border-radius:var(--dsw-radius-md);cursor:pointer;font-family:inherit;font-size:14px;line-height:22px;color:var(--dsw-alias-label-primary);background:transparent;padding:0 14px;height:36px}.ds-button:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}.ds-button:active:not(:disabled){background:var(--dsw-alias-interactive-bg-active)}.ds-button:disabled{cursor:not-allowed;opacity:.4}.ds-body{font:14px/1.6 system-ui}.ds-body button:focus-visible{outline:2px solid var(--dsw-alias-label-primary);outline-offset:2px}"
+    },
+    {
+      "name": "带标签输入",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "实际字段的标签、主题绑定和键盘焦点；示例路径仅供样式预览。",
+      "html": "<div class=\"ds-field\"><label for=\"ds-path-preview\">工作区内的文档路径</label><input id=\"ds-path-preview\" placeholder=\"例如 evidence/paper.pdf\"></div>",
+      "css": ".ds-field{display:grid;gap:6px;font:14px/1.6 system-ui;color:var(--dsw-alias-label-primary)}.ds-field input,.ds-field textarea{box-sizing:border-box;width:100%;padding:10px 12px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-module-platform);color:var(--dsw-alias-label-primary);font:inherit;caret-color:var(--dsw-alias-label-primary)}.ds-field input:focus-visible,.ds-field textarea:focus-visible{outline:2px solid var(--dsw-alias-label-primary);outline-offset:2px}"
+    },
+    {
+      "name": "多行输入",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "沿用字段语言，保留垂直调整与最小高度。",
+      "html": "<div class=\"ds-field\"><label for=\"ds-request-preview\">修改要求与必须保留的事实</label><textarea id=\"ds-request-preview\"></textarea></div>",
+      "css": ".ds-field{display:grid;gap:6px;font:14px/1.6 system-ui;color:var(--dsw-alias-label-primary)}.ds-field input,.ds-field textarea{box-sizing:border-box;width:100%;padding:10px 12px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-module-platform);color:var(--dsw-alias-label-primary);font:inherit;caret-color:var(--dsw-alias-label-primary)}.ds-field input:focus-visible,.ds-field textarea:focus-visible{outline:2px solid var(--dsw-alias-label-primary);outline-offset:2px}.ds-field textarea{min-height:110px;resize:vertical}"
+    },
+    {
+      "name": "原生流程标签",
+      "kind": "nav",
+      "refersTo": "segmented-tabs",
+      "description": "原生 SegmentedTabs 样式的静态任务选中预览；实际交互必须使用原生组件，预览不替代键盘状态机。",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\" aria-label=\"长文工作流程预览\"><span class=\"ds-indicator\" aria-hidden=\"true\"></span><button type=\"button\" class=\"ds-tab\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">文档</button><button type=\"button\" class=\"ds-tab\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">修改</button><button type=\"button\" class=\"ds-tab\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">检索</button><button type=\"button\" class=\"ds-tab\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">生成</button><button type=\"button\" class=\"ds-tab\" role=\"tab\" aria-selected=\"true\" tabindex=\"0\">任务</button></div>",
+      "css": ".ds-tabs{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:4px;border-radius:var(--dsw-radius-lg);background:var(--dsw-alias-bg-module-platform)}.ds-indicator{position:absolute;inset:4px auto 4px 4px;box-sizing:border-box;width:calc((100% - 8px)/5);transform:translateX(400%);border:.5px solid var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-md);background:var(--dsw-alias-bg-layer-3);transition:transform 180ms ease;pointer-events:none}.ds-tab{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;height:34px;padding:0 12px;border:none;border-radius:var(--dsw-radius-md);corner-shape:round;cursor:pointer;font-family:inherit;font-size:14px;line-height:20px;background:transparent;color:var(--dsw-alias-label-secondary);transition:color 180ms ease}.ds-tab:hover,.ds-tab[aria-selected=\"true\"]{background:transparent;color:var(--dsw-alias-label-primary)}.ds-tab[aria-selected=\"true\"]{font-weight:600}.ds-tab:focus-visible{outline:none;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-indicator,.ds-tab{transition:none}}"
+    },
+    {
+      "name": "任务分隔行",
+      "kind": "custom",
+      "refersTo": "task-row",
+      "description": "任务目标和次级计数采用细线列表；预览文本不是验收或科学质量证据。",
+      "html": "<section class=\"ds-task\"><h3>示例任务目标</h3><p class=\"ds-meta ds-count\">进行中 · 0 次模型调用 · 0 tokens</p></section>",
+      "css": ".ds-task{font:14px/1.6 system-ui;color:var(--dsw-alias-label-primary);padding:16px 0;border-bottom:1px solid var(--dsw-alias-border-l2);overflow-wrap:anywhere}.ds-task h3{font-size:14px;margin:0 0 6px;font-weight:600}.ds-task p{margin:12px 0}.ds-meta{color:var(--dsw-alias-label-secondary);font-size:12px;overflow-wrap:anywhere}.ds-count{font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "操作结果",
+      "kind": "custom",
+      "refersTo": "result",
+      "description": "结果数据保持换行、长字符串折行与内部滚动；示例 JSON 仅供排版预览。",
+      "html": "<div class=\"ds-result\"><pre>{\"preview\": true}</pre></div>",
+      "css": ".ds-result{color:var(--dsw-alias-label-primary)}.ds-result pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--dsw-alias-bg-module-platform);padding:12px;font:12px/1.7 ui-monospace,monospace;max-height:240px;overflow:auto}.ds-result ::selection{background:var(--dsw-alias-bg-overlay)}.ds-result ::-webkit-scrollbar{width:8px}.ds-result ::-webkit-scrollbar-thumb{background:var(--dsw-alias-border-l2);border-radius:8px}@media(prefers-reduced-motion:no-preference){.ds-result{animation:ds-arrive .16s ease-out}@keyframes ds-arrive{from{opacity:.65}to{opacity:1}}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "继承原生 DSH 操作面板",
+    "overview": "这是现有 DSH Web 的局部扩展，不是一个新视觉世界。视觉权威来自宿主主题及 `@deepseek-ai/dsh-client-ui-primitives` 的 Modal、Button、SegmentedTabs；本文件记录已实现的继承关系与局部布局，不替宿主重新定义颜色、字体或控件。\n\n系统以紧凑、清晰的正文和操作信息为主。表单与任务按内容自然堆叠，状态、问题与操作结果保持可读；科学文档的原稿保护与实验能力说明作为操作信息呈现。",
+    "keyCharacteristics": [
+      "宿主主题变量随用户主题变化。",
+      "原生控件承担对话框、按钮和流程导航。",
+      "系统正文、次级元数据与等宽结果构成局部信息层级。",
+      "表单单列堆叠，任务以细分隔线区分，窄屏换行并独立滚动。"
+    ],
+    "rules": [
+      {
+        "name": "The Host Theme Rule",
+        "body": "保留语义变量绑定；新增局部内容继续使用宿主角色，不以截图取色覆盖用户主题。",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "**Do** 继承原生语义色、圆角、Modal、Button 与 SegmentedTabs。",
+      "**Do** 保留字段标签、状态语义、错误反馈和键盘焦点。",
+      "**Do** 让长路径、任务目标和结果换行，并维持面板的独立滚动。",
+      "**Do** 用次级文字呈现操作元数据，用主要文字保持正文和动作可读。"
+    ],
+    "donts": [
+      "**Don't** 将浅色截图的颜色或宿主变量当前值硬编码成扩展主题。",
+      "**Don't** 用独立展示字体、装饰材质或新增阴影替换这个局部面板的原生控件语言。",
+      "**Don't** 把局部流程或任务列表结构推广为整个 DSH 的页面布局规则。"
+    ]
+  }
+}

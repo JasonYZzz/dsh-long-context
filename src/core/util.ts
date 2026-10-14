@@ -4,7 +4,7 @@ export const hash = (input: string | Uint8Array): string => createHash('sha256')
 export const id = (prefix: string): string => `${prefix}_${randomUUID()}`;
 export const points = (text: string): string[] => Array.from(text);
 export const length = (text: string): number => Array.from(text).length;
-export const slice = (text: string, start: number, end?: number): string => Array.from(text).slice(start, end).join('');
+export const slice = (text: string | readonly string[], start: number, end?: number): string => (typeof text==='string'?points(text):text).slice(start,end).join('');
 export function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
   if (value !== null && typeof value === 'object') return `{${Object.entries(value).filter(([,v]) => v !== undefined).sort(([a],[b]) => a.localeCompare(b)).map(([k,v]) => `${JSON.stringify(k)}:${canonical(v)}`).join(',')}}`;

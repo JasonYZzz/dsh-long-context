@@ -32,3 +32,15 @@ describe('lossless source evidence',()=>{
     h.files.seed('scan.pdf','%PDF-1.7\0binary');await expect(h.engine.importDocument({path:'scan.pdf',format:'txt'})).rejects.toMatchObject({code:'LC_FORMAT_UNSUPPORTED'});
   }finally{await h.cleanup();}});
 });
+it('finds and reads a term spanning the default block boundary',async()=>{
+  const source='x'.repeat(3996)+'DualPipe'+'y'.repeat(4200),h=await harness(source);
+  try{const result=await h.engine.search({revisionId:h.doc.revisionId,query:'DualPipe'});expect(result.total).toBe(1);
+    const found=result.hits[0]!;expect(found.start).toBe(3996);expect(found.end).toBe(4004);
+    expect(()=>validateAnchor(h.doc,source,found,'DualPipe')).not.toThrow();
+  }finally{await h.cleanup();}
+});
+
+it('paginates thousands of Unicode matches with exact absolute offsets',async()=>{
+ const source='甲😀ROOT=10\n'.repeat(1500),h=await harness(source,{maxToolResultCodePoints:1500});try{let cursor:string|undefined,index=0;do{const page=await h.engine.search({revisionId:h.doc.revisionId,query:'😀ROOT=10',cursor});expect(page.total).toBe(1500);for(const hit of page.hits){expect(hit.start).toBe(index*10+1);expect(hit.end).toBe(index*10+9);expect(hit.textHash).toBe(hash('😀ROOT=10'));index++;}cursor=page.nextCursor??undefined;}while(cursor);expect(index).toBe(1500);await expect(h.engine.search({revisionId:h.doc.revisionId,query:'\uDE00'})).rejects.toMatchObject({code:'LC_INVALID_ARGUMENT'});
+ }finally{await h.cleanup();}
+});

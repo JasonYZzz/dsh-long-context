@@ -1,0 +1,631 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-14T08:32:43.800Z",
+  "pluginVersion": "0.2.0",
+  "ledgerSchema": 2,
+  "releaseVerdict": "experimental-preview-incomplete-plan",
+  "stableReleaseReady": false,
+  "native": {
+    "path": "evaluation/runs/implementation-20261014/native-integrity.json",
+    "sha256": "0fa96fb9aa3b3654189aa4fd0eb34abfa6c9f1019dca6dae4e2b120420944546",
+    "data": {
+      "release": "0.2.0-rc.2",
+      "tarballIntegrity": true,
+      "installedEntryMatchesOfficial": true,
+      "installedHash": "1a03dee18683483ff6a1b27b2a1e650230da6bcca9a0f55f7d81b3308c3f307f",
+      "scope": "All main @deepseek-ai/dsh packaged files; transitive package integrity is not established",
+      "packagedFilesChecked": 20,
+      "packageDifferences": [],
+      "installedPackageMatchesOfficial": true
+    }
+  },
+  "loader": {
+    "path": "evaluation/runs/web-loader/result.json",
+    "sha256": "05d8b9d2353104c637144f55a14b2cca752ebaa9979bde8dd921006a1fb745ac",
+    "data": {
+      "verdict": "passed",
+      "layer": "L1-loader-and-agent-tools",
+      "presets": [
+        {
+          "id": "standard",
+          "order": 1
+        },
+        {
+          "id": "ptc",
+          "order": 2
+        },
+        {
+          "id": "minimal",
+          "order": 3
+        },
+        {
+          "id": "cordis",
+          "order": 4
+        },
+        {
+          "id": "long-context",
+          "name": "Long Context",
+          "description": "Evidence-bound document editing with a persistent task ledger",
+          "order": 5
+        }
+      ],
+      "names": [
+        "lc_research_start",
+        "lc_research_import",
+        "lc_research_next",
+        "lc_research_finish",
+        "lc_generate_start",
+        "lc_generate_next",
+        "lc_generate_revise",
+        "lc_generate_finish",
+        "lc_import",
+        "lc_inspect",
+        "lc_read",
+        "lc_search",
+        "lc_task_start",
+        "lc_scan_next",
+        "lc_impact_review",
+        "lc_plan",
+        "lc_apply",
+        "lc_verify",
+        "lc_status",
+        "lc_finish",
+        "lc_resume",
+        "lc_rollback",
+        "lc_export_report",
+        "ask_user_question"
+      ],
+      "importResult": {
+        "ok": true,
+        "data": {
+          "documentId": "doc_c3f7bba8-7e0f-429a-bdd5-6ca15d792d24",
+          "revisionId": "rev_79efb72e-19a2-4946-a7ed-9ddb2e349c14",
+          "format": "md",
+          "pages": null,
+          "length": 6020,
+          "blocks": 2,
+          "qualityIssueCount": 0,
+          "qualityIssues": [],
+          "nextAction": "lc_inspect"
+        }
+      },
+      "model": "not-run",
+      "browserInteraction": "separate manual CUA evidence",
+      "limitations": [
+        "Does not establish model quality or compression behavior"
+      ]
+    }
+  },
+  "exactEditing": {
+    "path": "evaluation/runs/edit-real/result.json",
+    "sha256": "11549d72277ba4ba21a5f7fffaaf329c989727158ed588e4b37ea87f66d5195e",
+    "data": [
+      {
+        "name": "deepseek-v3-accepted.txt",
+        "codePoints": 150580,
+        "blocks": 38,
+        "occurrences": 16,
+        "originalUnchanged": true,
+        "exactExpected": true,
+        "modelCalls": 0,
+        "elapsedMs": 2397,
+        "verdict": "passed",
+        "scope": "Exact text projection only; no claim of semantic architecture revision or original PDF layout preservation"
+      },
+      {
+        "name": "deepseek-r1-accepted.txt",
+        "codePoints": 56944,
+        "blocks": 15,
+        "occurrences": 131,
+        "originalUnchanged": true,
+        "exactExpected": true,
+        "modelCalls": 0,
+        "elapsedMs": 961,
+        "verdict": "passed",
+        "scope": "Exact text projection only; no claim of semantic architecture revision or original PDF layout preservation"
+      },
+      {
+        "name": "attention-accepted.txt",
+        "codePoints": 39629,
+        "blocks": 10,
+        "occurrences": 26,
+        "originalUnchanged": true,
+        "exactExpected": true,
+        "modelCalls": 0,
+        "elapsedMs": 552,
+        "verdict": "passed",
+        "scope": "Exact text projection only; no claim of semantic architecture revision or original PDF layout preservation"
+      }
+    ]
+  },
+  "pdf": {
+    "path": "evaluation/runs/pdf-native-tools/result.json",
+    "sha256": "bb70f1879310cfaed7397f5aa52d4c402ba8300073d22aa5751350b1edf9d20c",
+    "data": {
+      "verdict": "passed",
+      "results": [
+        {
+          "name": "deepseek-v3.pdf",
+          "pages": 53,
+          "codePoints": 157136,
+          "blocks": 40,
+          "qualityIssues": [
+            "pdf:page:8:unmapped-symbol",
+            "pdf:page:9:unmapped-symbol",
+            "pdf:page:15:image-content-not-extracted",
+            "pdf:page:16:image-content-not-extracted",
+            "pdf:page:23:image-content-not-extracted",
+            "pdf:page:28:image-content-not-extracted",
+            "pdf:page:30:unmapped-symbol",
+            "pdf:page:47:image-content-not-extracted",
+            "pdf:page:49:image-content-not-extracted",
+            "pdf:page:50:image-content-not-extracted",
+            "pdf:page:51:image-content-not-extracted",
+            "pdf:page:52:image-content-not-extracted",
+            "pdf:page:53:image-content-not-extracted"
+          ],
+          "originalBytesPreserved": true,
+          "fullReadReconstructed": true,
+          "verdict": "passed-extraction-mechanism",
+          "scientificExtractionAcceptance": "not-run"
+        },
+        {
+          "name": "ccl-rag-2024.pdf",
+          "pages": 18,
+          "codePoints": 68506,
+          "blocks": 18,
+          "qualityIssues": [
+            "pdf:page:1:overprinted-text",
+            "pdf:page:2:overprinted-text",
+            "pdf:page:4:overprinted-text",
+            "pdf:page:5:overprinted-text",
+            "pdf:page:6:overprinted-text",
+            "pdf:page:7:overprinted-text",
+            "pdf:page:8:overprinted-text",
+            "pdf:page:9:overprinted-text",
+            "pdf:page:10:overprinted-text",
+            "pdf:page:11:overprinted-text"
+          ],
+          "originalBytesPreserved": true,
+          "fullReadReconstructed": true,
+          "verdict": "passed-extraction-mechanism",
+          "scientificExtractionAcceptance": "not-run"
+        }
+      ]
+    }
+  },
+  "research": {
+    "path": "evaluation/runs/research-real/result.json",
+    "sha256": "a4daeea5631e84f20a0924abc8591bc8aa072c390b8183eeec7f76d1fab40c4f",
+    "data": {
+      "topic": "Can retrieval augmented generation improve factual accuracy?",
+      "asOf": "2026-10-14",
+      "source": "https://aclanthology.org/2024.ccl-2.9.pdf",
+      "pdfHash": "315c9f89d604a6405d8c270e9b13b9214e2bbca9acdb61a5ea687a767fe0bfc0",
+      "pdfPages": 18,
+      "pdfIssues": [
+        "pdf:page:1:overprinted-text",
+        "pdf:page:2:overprinted-text",
+        "pdf:page:4:overprinted-text",
+        "pdf:page:5:overprinted-text",
+        "pdf:page:6:overprinted-text",
+        "pdf:page:7:overprinted-text",
+        "pdf:page:8:overprinted-text",
+        "pdf:page:9:overprinted-text",
+        "pdf:page:10:overprinted-text",
+        "pdf:page:11:overprinted-text"
+      ],
+      "group": "Research Center for Social Computing and Information Retrieval",
+      "title": "Enhancing Large Language Models with Retrieval-Augmented Techniques: Trends, Challenges, and Prospects",
+      "network": "passed",
+      "verdict": "passed-shortfall-guard",
+      "scientificReview": "not-run",
+      "quotaAcceptance": "not-passed",
+      "networkPage": {
+        "added": 48,
+        "total": 48,
+        "sourceDone": false,
+        "sourceHash": "52c850a974fab015705e5dcafa67f5409f8cdce10dd44b02176426fe3c45d075"
+      },
+      "state": "needs_attention",
+      "shortfall": {
+        "target": 51,
+        "selected": [],
+        "missing": {
+          "zh": 17,
+          "en": 34
+        }
+      }
+    }
+  },
+  "relevance": {
+    "path": "evaluation/runs/relevance-real/result.json",
+    "sha256": "1c2700ab07278b2346ffadccf1caad4a886112ffcd517b0934faedf27b31e421",
+    "data": {
+      "verdict": "passed-limited-text-review",
+      "scope": "Actual auxiliary scientific relevance review of readable text projection only; not paper eligibility, quota acceptance or human review",
+      "provider": "bailian",
+      "model": "qwen3.8-max",
+      "question": "Can retrieval augmented generation improve factual accuracy, and what limits that improvement?",
+      "windows": [
+        {
+          "start": 0,
+          "end": 12000,
+          "decision": "include",
+          "reason": "The paper directly addresses whether RAG improves factual accuracy and what limits that improvement, noting RALMs' superiority in factuality but inconsistent example-level performance, and identifying innate differences in knowledge sources and unpredictable reader model degeneration as key limiting factors.",
+          "quoteId": "q5",
+          "quoteHash": "993c7abfc3d0378442413e864f14fc90a8dffad580039cad0f28a0d2d273fc0e"
+        },
+        {
+          "start": 12000,
+          "end": 24000,
+          "decision": "include",
+          "reason": "The paper directly addresses what limits factual accuracy improvement in retrieval-augmented generation (RALM) by decomposing errors into Retriever Error, Hallucination Error, and Extraction Error, and showing that inconsistent error patterns across retrievers limit performance. It also proposes ensembling retrievers to improve accuracy.",
+          "quoteId": "q51",
+          "quoteHash": "a4a62eafb4565503edaa6ebe461cd4bcdd7ee1cd64c8115ace318a13334156b9"
+        },
+        {
+          "start": 24000,
+          "end": 36000,
+          "decision": "include",
+          "reason": "The paper directly addresses how retrieval-augmented generation can improve factual accuracy (via the EoR ensemble framework boosting RALM performance) and what limits that improvement, including incorrect retrieval, weak LM robustness to irrelevant/long context, distribution shift between train and test retriever performance, unpredictable reader model degeneration, and computational cost of ensembling multiple retrievers.",
+          "quoteId": "q54",
+          "quoteHash": "4cd5a41c9ac601547b1e910bc1b61951590db67fdc15ea3a78e7002e30b62c01"
+        },
+        {
+          "start": 36000,
+          "end": 48000,
+          "decision": "exclude",
+          "reason": "The provided text is solely a references/bibliography section listing citations. It contains no direct evidence, findings, or discussion addressing whether retrieval augmented generation improves factual accuracy or what limits that improvement.",
+          "quoteId": null,
+          "quoteHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "start": 48000,
+          "end": 60000,
+          "decision": "include",
+          "reason": "The text provides a formal error decomposition for retrieval-augmented language models (RALMs), explicitly breaking down the probability of incorrect answers into retriever errors, hallucination errors, extraction errors, and lucky guesses. This directly addresses what limits the factual accuracy improvement from RAG.",
+          "quoteId": "q25",
+          "quoteHash": "498d87b3db2f81aa421dbb968c9547220c5e6a21d17b0fed9e0e9c7b62faddcc"
+        },
+        {
+          "start": 60000,
+          "end": 60422,
+          "decision": "uncertain",
+          "reason": "The text only contains figure captions mentioning 'Full Error Relative Win Ratio between different Retrievers' with various base LMs, but the actual data, results, and analysis are in omitted figures. There is insufficient readable evidence to determine how RAG improves factual accuracy or what limits that improvement.",
+          "quoteId": null,
+          "quoteHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "source": {
+        "url": "https://aclanthology.org/2024.findings-acl.288/",
+        "pdfHash": "03f54e6de76c8c07d86a0b1bd5ee78e4f1229f40aa8999604f4d822536cdb3d7",
+        "pages": 18,
+        "qualityIssues": [
+          "pdf:page:1:image-content-not-extracted",
+          "pdf:page:3:image-content-not-extracted",
+          "pdf:page:4:image-content-not-extracted",
+          "pdf:page:5:image-content-not-extracted",
+          "pdf:page:6:image-content-not-extracted",
+          "pdf:page:7:image-content-not-extracted",
+          "pdf:page:16:image-content-not-extracted",
+          "pdf:page:17:image-content-not-extracted",
+          "pdf:page:18:image-content-not-extracted"
+        ]
+      },
+      "humanReview": "not-run",
+      "eligibility": "not-evaluated",
+      "calls": 6,
+      "tokens": 46784,
+      "unknownUsage": false,
+      "taskId": "workflow_0ee9925d338be0b57843a6fccaab5aa0"
+    }
+  },
+  "modelCalibration": {
+    "path": "evaluation/runs/model-calibration/result.json",
+    "sha256": "78adb65a8c4c5d71baecb63dfea41fafd80c8eacf1bd55c19b1e8d8a5154f89d",
+    "data": {
+      "provider": "bailian",
+      "model": "qwen3.8-max",
+      "parameters": {
+        "reasoningEffort": "off",
+        "maxOutputTokens": 8192,
+        "deadlineMs": 120000
+      },
+      "verdict": "passed",
+      "taskId": "task_de945765ebb45e9dc76c3a92d9350194",
+      "exactExpected": true,
+      "audit": [
+        {
+          "purpose": "scan",
+          "promptVersion": "lc-prompts/2",
+          "inputHash": "b4a7702c0123aee71df8b92bc94c6bb60bb2ebd72a32324b73392ad8d752123a",
+          "outputHash": "96f96742e264aebc70143cf7e74f2b323adda6c062bd11c15ac91d3b0c0d5513",
+          "model": "qwen3.8-max",
+          "provider": "bailian",
+          "usage": {
+            "input": 1061,
+            "output": 144
+          },
+          "reasoningChunks": 0,
+          "retryReason": null,
+          "finishReason": "stop",
+          "elapsedMs": 4275,
+          "error": null
+        },
+        {
+          "purpose": "analysis",
+          "promptVersion": "lc-prompts/2",
+          "inputHash": "4987625da2b6c8f6764c407762666c7a6c1f8385a4ee275f23be97f0c8dc0dee",
+          "outputHash": "a74f7049cd8e9d63d99011b4fa64f04647d3eab9050cba77f9b7a1769f79d104",
+          "model": "qwen3.8-max",
+          "provider": "bailian",
+          "usage": {
+            "input": 642,
+            "output": 67
+          },
+          "reasoningChunks": 0,
+          "retryReason": null,
+          "finishReason": "stop",
+          "elapsedMs": 1631,
+          "error": "Verifier quotes must appear in original/candidate evidence"
+        },
+        {
+          "purpose": "verify",
+          "promptVersion": "lc-prompts/2",
+          "inputHash": "9978fd6b7915e31d83807e4f4cb0a7fb27e57da35340f5440d6c4cad03f9fa59",
+          "outputHash": "c92a3cfe759615a999c35e2faf2a4b395007ade025685a57a0a6ec9f77e140cd",
+          "model": "qwen3.8-max",
+          "provider": "bailian",
+          "usage": {
+            "input": 669,
+            "output": 29
+          },
+          "reasoningChunks": 0,
+          "retryReason": "Verifier quotes must appear in original/candidate evidence",
+          "finishReason": "stop",
+          "elapsedMs": 1057,
+          "error": null
+        }
+      ],
+      "state": "completed_with_checks"
+    }
+  },
+  "generationControlled": {
+    "path": "evaluation/runs/generation-controlled-100/result.json",
+    "sha256": "c52fe6fb41380e49b394b75472bf637b24d46573a502d48cf61174247e8489b5",
+    "data": {
+      "verdict": "passed-controlled",
+      "scope": "Fixture checks only; no actual model or scientific-quality claim",
+      "logicalPages": 100,
+      "physicalPages": 100,
+      "restart": true,
+      "idempotent": true,
+      "earlyDefinitionInLastRequest": true,
+      "definitionRevisionInvalidatedAll": true,
+      "revisedLogicalPages": 100,
+      "revisedPhysicalPages": 100,
+      "newDefinitionInLastRequest": true,
+      "revisedArtifact": "/Users/admin/dsh/dsh-long-context/evaluation/runs/generation-controlled-100/workspace/state-1791966324411/artifacts/338a757f6abc7d778c64f41967214c7cfa662f43d91732b97025276bd7b2c0d0.pdf",
+      "oldArtifactRetained": "/Users/admin/dsh/dsh-long-context/evaluation/runs/generation-controlled-100/workspace/state-1791966324411/artifacts/97182ff2140440a1c225d8d61167a07ab4d2cc3119c57ade24f1e58b96c765c5.pdf",
+      "calls": 400,
+      "elapsedMs": 47505,
+      "p50Ms": 106,
+      "p95Ms": 166,
+      "rssBytes": 400408576
+    }
+  },
+  "rendererCalibration": {
+    "path": "evaluation/runs/implementation-20261014/render-calibration.json",
+    "sha256": "31e202e8ee56b0d96ae72a38743fc4465e3aa3ca7b69d47338af4bdcec095dc3",
+    "data": [
+      {
+        "target": 30,
+        "pages": 30,
+        "renderer": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+        "templateHash": "220eccc322a4647ef0fefbc52816c1383a68dce9c5963ba4713f8144ce511e03",
+        "bytes": 124869,
+        "textFidelity": "passed",
+        "kind": "controlled-renderer-calibration-not-model-generated",
+        "verdict": "passed"
+      },
+      {
+        "target": 100,
+        "pages": 100,
+        "renderer": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+        "templateHash": "220eccc322a4647ef0fefbc52816c1383a68dce9c5963ba4713f8144ce511e03",
+        "bytes": 258820,
+        "textFidelity": "passed",
+        "kind": "controlled-renderer-calibration-not-model-generated",
+        "verdict": "passed"
+      }
+    ]
+  },
+  "generationReal": {
+    "path": "evaluation/runs/generation-real-30/result.json",
+    "sha256": "fedb3d35c69c52e9083382905eb433bf3db8512b7f216a367574e1866e826810",
+    "data": {
+      "target": 30,
+      "provider": "bailian",
+      "model": "qwen3.8-max",
+      "verdict": "passed-automated-checks",
+      "modelGeneration": "real",
+      "frozenCallBudget": 180,
+      "resumeTask": "workflow_53edf04c36a78037c0131b5c1d4bc828",
+      "physicalPages": 30,
+      "source": {
+        "url": "https://arxiv.org/pdf/2310.11511v1",
+        "pages": 30,
+        "qualityIssues": [
+          "pdf:page:2:image-content-not-extracted",
+          "pdf:page:5:image-content-not-extracted"
+        ],
+        "scope": "Readable text projection only; figures/formulas not asserted"
+      },
+      "taskId": "workflow_53edf04c36a78037c0131b5c1d4bc828",
+      "finish": {
+        "taskId": "workflow_53edf04c36a78037c0131b5c1d4bc828",
+        "journalRevision": 62,
+        "state": "completed_with_checks",
+        "detail": {
+          "outputPath": "/Users/admin/dsh/dsh-long-context/evaluation/runs/generation-real-30/workspace/rag-review.md",
+          "renderedPath": "/Users/admin/dsh/dsh-long-context/evaluation/runs/generation-real-30/workspace/.dsh-long-context/artifacts/2666ac0152e0313af367a1ab005dd20dcc1ff7c106ea6676e0c00faae5f3ccbb.pdf",
+          "renderedHash": "2666ac0152e0313af367a1ab005dd20dcc1ff7c106ea6676e0c00faae5f3ccbb",
+          "physicalPages": 30,
+          "renderer": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+          "templateHash": "220eccc322a4647ef0fefbc52816c1383a68dce9c5963ba4713f8144ce511e03"
+        }
+      },
+      "humanScientificReview": "not-run",
+      "state": "completed_with_checks",
+      "logicalPages": 30,
+      "calls": 90,
+      "tokens": 808771,
+      "candidate": {
+        "path": "/Users/admin/dsh/dsh-long-context/evaluation/runs/generation-real-30/workspace/rag-review.md",
+        "contentHash": "061fe78c8e5b812d0409531d1de8bae6bc19965ef269e286764c82d806d56c2e",
+        "renderedPath": "/Users/admin/dsh/dsh-long-context/evaluation/runs/generation-real-30/workspace/.dsh-long-context/artifacts/2666ac0152e0313af367a1ab005dd20dcc1ff7c106ea6676e0c00faae5f3ccbb.pdf",
+        "renderedHash": "2666ac0152e0313af367a1ab005dd20dcc1ff7c106ea6676e0c00faae5f3ccbb",
+        "pages": 30
+      }
+    }
+  },
+  "generationVisualQa": {
+    "path": "evaluation/runs/generation-real-30/visual-qa/result.json",
+    "sha256": "777105bd9488ed769ad4ca638b578dc336976fce70a4d16dca77b82baf7e74c2",
+    "data": {
+      "verdict": "passed-sampled-layout",
+      "reviewer": "Codex visual inspection",
+      "physicalPages": 30,
+      "pagesInspected": [
+        1,
+        15,
+        30
+      ],
+      "readableFonts": true,
+      "clippingObserved": false,
+      "scope": "Three sampled pages only; full scientific review not run. No title-page/table-of-contents/page-number/author-DOI bibliography acceptance is claimed.",
+      "images": [
+        "page-1.png",
+        "page-15.png",
+        "page-30.png"
+      ]
+    }
+  },
+  "performanceBeforeJournalCache": {
+    "path": "evaluation/runs/performance/result.json",
+    "sha256": "e0486510df3ac77861f83dceb69c0ab3a89c802f5a7eb916621d1ff76ae82ddb",
+    "data": {
+      "verdict": "incomplete-stopped-slow-baseline",
+      "scope": "Pre-journal-cache run stopped after over 15 minutes; no full completion or valid paired performance comparison is claimed",
+      "taskId": "task_cb30f25b07f6d79f834996ee37293afa",
+      "state": "scanning",
+      "reviewed": 90,
+      "impacts": 6000,
+      "modelCalls": 0,
+      "preservedWorkspace": "evaluation/runs/performance/100-1791965605084",
+      "observedElapsedMs": 919013
+    }
+  },
+  "performance": {
+    "path": "evaluation/runs/performance-cache/result.json",
+    "sha256": "9cfaa1564278ea8c36c22f0a21aee77c88506f90191da07c3a86aa636077005b",
+    "data": {
+      "verdict": "passed",
+      "scope": "One local synthetic sample per size; no paired A/B or statistical quality claim; 500-unit full editing not run",
+      "inputByteLimit": 20000000,
+      "oversizedInputRejected": true,
+      "results": [
+        {
+          "logicalSeparators": 100,
+          "physicalPages": null,
+          "sourceKind": "Synthetic dense text; separators do not establish physical pages",
+          "bytes": 956291,
+          "codePoints": 374291,
+          "blocks": 94,
+          "importMs": 336,
+          "searchMs": 3708,
+          "totalHits": 6000,
+          "fullEdit": "passed",
+          "recoveryMs": 8630,
+          "elapsedMs": 136209,
+          "scanP50Ms": 930,
+          "scanP95Ms": 2099,
+          "journalBytes": 260113035,
+          "modelCalls": 0,
+          "rssBytes": 445415424
+        },
+        {
+          "logicalSeparators": 500,
+          "physicalPages": null,
+          "sourceKind": "Synthetic dense text; separators do not establish physical pages",
+          "bytes": 4781891,
+          "codePoints": 1871891,
+          "blocks": 469,
+          "importMs": 30196,
+          "searchMs": 144248,
+          "totalHits": 30000,
+          "fullEdit": "not-run",
+          "generationLimit": "rejected as required (30–100 only)",
+          "modelCalls": 0,
+          "rssBytes": 395984896
+        }
+      ]
+    }
+  },
+  "notPassed": [
+    "Real 51-paper quota with 17 Chinese / 34 English originals",
+    "Real definition/paragraph/architecture semantic gold",
+    "Real 100-page model generation",
+    "Human full scientific content review"
+  ],
+  "notDelivered": [
+    "Automatic generation parent / editing child prepared-committed adoption",
+    "Fine-grained dirty propagation and literal root-paragraph adoption",
+    "Per-page PDF quality acceptance and OCR",
+    "DOCX original-layout managed binary writeback",
+    "Checked isolated single-file LaTeX compiler",
+    "Complete native browser journey and true provider context-overflow matrix",
+    "Paired standard-mode A/B and clustered quality confidence intervals"
+  ],
+  "scope": "Controlled fixtures validate mechanisms only. Readable PDF projections and auxiliary model reviews do not certify figures/formulas, full scientific accuracy, group identity, original language or first-publication dates. Files in evaluation/runs remain local and are not packaged.",
+  "tests": {
+    "path": "evaluation/runs/full-suite-current.log",
+    "sha256": "1f51b2bd1d946aeaa243fa1b51e2e9a03587e7be1521452ff1bccbf1f48b0696",
+    "passed": 53,
+    "failed": 0,
+    "verdict": "passed"
+  },
+  "previousGenerationRuns": [
+    {
+      "path": "evaluation/runs/generation-real-30/result-before-1791965012083.json",
+      "taskId": "workflow_6c5be171b131fe557b5de6ddcdba254a",
+      "verdict": "failed",
+      "logicalPages": 24,
+      "physicalPages": null,
+      "calls": 118,
+      "tokens": 675639,
+      "error": "Error: Model validation failed; range remains pending. Generated body has 310 words; page maximum is 300. Shorten the body without inventing or hiding facts"
+    },
+    {
+      "path": "evaluation/runs/generation-real-30/result-before-1791965964563.json",
+      "taskId": "workflow_53edf04c36a78037c0131b5c1d4bc828",
+      "verdict": "failed",
+      "logicalPages": 10,
+      "physicalPages": null,
+      "calls": 42,
+      "tokens": 261106,
+      "error": "Error: The candidate page makes multiple specific claims about ISSUP definitions, inference behavior, human evaluation procedures, and ethical limitations that are fully supported by the visible source text but not by any of the provided evidenceChoices. The only selected evidence id (e0) covers the ISSUP token values, leaving claims about inference critique steps, S&P evaluation methodology, PopQA results, and unsupported output caveats entirely unbacked by the chosen evidence."
+    }
+  ],
+  "previousRelevanceRuns": [
+    {
+      "path": "evaluation/runs/relevance-real/result-before-1791966099167.json",
+      "verdict": "failed",
+      "windows": 0,
+      "calls": 2,
+      "tokens": 6931,
+      "error": "Error: Scientific review did not return a validated result"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+import {z} from 'zod';
+import {auditSchema,anchorSchema} from '../types.js';
+const key=z.string().regex(/^[a-zA-Z0-9_-]{1,160}$/),sha=z.string().regex(/^[a-f0-9]{64}$/);
+export const researchQuerySchema=z.object({question:z.string().min(1).max(1000),asOf:z.string().regex(/^\d{4}-\d{2}-\d{2}$/),groupName:z.string().min(1).max(200),groupMembers:z.array(z.string().min(1).max(200)).min(1).max(100),groupEvidence:anchorSchema,minCount:z.number().int().min(1).max(300).default(50)}).strict();
+export const paperInputSchema=z.object({doi:z.string().min(1).optional(),arxivId:z.string().min(1).optional(),title:z.string().min(1),authors:z.array(z.string().min(1)).min(1),published:z.string().regex(/^\d{4}(?:-\d{2}(?:-\d{2})?)?$/).nullable(),sourceUrl:z.string().url(),revisionId:key.nullable().default(null),abstract:z.string().default(''),participationEvidence:anchorSchema.optional()}).strict();
+export const paperSchema=paperInputSchema.extend({workId:key,bodyHash:sha,language:z.enum(['zh','en','unknown']),decision:z.enum(['pending','include','exclude','uncertain']),reason:z.string(),evidence:z.string(),sourceHash:sha,extractionIssues:z.array(z.string()).default([]),reviewCursor:z.number().int().nonnegative().default(0),reviewUncertain:z.boolean().default(false)}).strict();
+export type Paper=z.infer<typeof paperSchema>;
+export const generationGoalSchema=z.object({title:z.string().min(1).max(500),outline:z.array(z.string().min(1).max(500)).min(1).max(100),pages:z.number().int().min(30).max(100),revisionIds:z.array(key).min(1).max(100),definitions:z.array(anchorSchema).default([])}).strict().refine(g=>g.outline.length===g.pages,{message:'Supply one distinct generation goal per logical page'});
+const base={schemaVersion:z.literal(2),taskId:key,workspaceId:sha,ownerSession:z.string().min(1),journalRevision:z.number().int().nonnegative(),
+  budget:z.object({maxCalls:z.number().int().positive(),maxTokens:z.number().int().positive(),maxWallMs:z.number().int().positive()}).nullable().default(null),
+  state:z.enum(['running','needs_attention','source_ready','completed_with_checks','cancelled']),createdAt:z.string(),corrections:z.number().int().nonnegative().default(0),attention:z.array(z.string()),calls:z.number().int().nonnegative(),tokens:z.number().int().nonnegative(),unknownUsage:z.boolean(),audits:z.array(auditSchema),requests:z.record(z.string(),z.object({fingerprint:sha,result:z.unknown()}))};
+export const workflowSchema=z.discriminatedUnion('taskKind',[
+  z.object({...base,taskKind:z.literal('research'),query:researchQuerySchema,papers:z.array(paperSchema),sourceCursor:z.string().nullable(),sourceDone:z.boolean(),sources:z.array(z.object({url:z.string().url(),fetchedAt:z.string(),contentHash:sha,cursor:z.string().nullable(),records:z.number().int().nonnegative()}).strict()).default([]),selection:z.array(key)}).strict(),
+  z.object({...base,taskKind:z.literal('generation'),goal:generationGoalSchema,pending:z.object({index:z.number().int().nonnegative(),contentHash:sha,summary:z.string().max(300),issues:z.array(z.string())}).nullable().default(null),units:z.array(z.object({index:z.number().int().nonnegative(),title:z.string(),contentHash:sha,summary:z.string().max(300),inputHash:sha,evidenceHashes:z.array(sha),sourceRevisionIds:z.array(key).default([]),citations:z.array(z.object({revisionId:key,quote:z.string().min(1)}).strict()).default([]),verified:z.boolean()}).strict()),candidate:z.object({path:z.string(),contentHash:sha,renderedPath:z.string().nullable(),renderedHash:sha.nullable(),pages:z.number().int().nullable()}).nullable()}).strict()
+]);
+export type Workflow=z.infer<typeof workflowSchema>;
+export const relevanceSchema=z.object({decision:z.enum(['include','exclude','uncertain']),reason:z.string().min(1),quoteId:key.nullable()}).strict();
+export const generatedSchema=z.object({text:z.string().min(1).max(8000),summary:z.string().min(1).max(300),citations:z.array(z.object({revisionId:key,quoteId:key}).strict()).min(1)}).strict();
+
+export const generationVerificationSchema=z.object({passed:z.boolean(),issues:z.array(z.string()),evidenceIds:z.array(z.string()).max(20)}).strict();

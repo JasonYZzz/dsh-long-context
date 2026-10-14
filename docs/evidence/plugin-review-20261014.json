@@ -1,0 +1,429 @@
+{
+  "date": "2026-10-14",
+  "timezone": "Asia/Shanghai",
+  "commit": "6e8ed90f2f273702c649544fb9a25a71beb0d93f",
+  "node": "v24.19.0",
+  "packageVersion": "0.1.0",
+  "unitTests": {
+    "passed": 22,
+    "total": 22
+  },
+  "checks": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "pack": "passed",
+    "preflight": "passed",
+    "loader": "passed",
+    "controlledCompaction": "passed",
+    "uninstall": "passed",
+    "reinstall": "passed"
+  },
+  "service3080": {
+    "running": true,
+    "longContextPresetVisible": false
+  },
+  "papers": [
+    {
+      "file": "deepseek-r1.pdf",
+      "pages": 22,
+      "characters": 56944,
+      "sha256": "52d8ca3ac93e88cef9944e1fd03b0e04aec5954495a8250fb2fadf8fa20a4dad",
+      "extractor": "pypdf",
+      "emptyPages": []
+    },
+    {
+      "file": "attention.pdf",
+      "pages": 15,
+      "characters": 39629,
+      "sha256": "bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697",
+      "extractor": "pypdf",
+      "emptyPages": []
+    },
+    {
+      "file": "deepseek-v3.pdf",
+      "pages": 53,
+      "characters": 150580,
+      "sha256": "812a3fd645c80725354de9d831a6785503007a60681461407f64e97305fa9330",
+      "extractor": "pypdf",
+      "emptyPages": []
+    }
+  ],
+  "probes": [
+    {
+      "test": "real-paper-import-read",
+      "name": "deepseek-v3",
+      "nativePDF": "LC_FORMAT_UNSUPPORTED",
+      "rawText": "LC_FORMAT_UNSUPPORTED",
+      "importMs": 30,
+      "blocks": 38,
+      "characters": 150580,
+      "qualityIssues": [],
+      "fullReadExact": true,
+      "readMs": 678,
+      "pageEnd": 53
+    },
+    {
+      "test": "real-paper-import-read",
+      "name": "deepseek-r1",
+      "nativePDF": "LC_FORMAT_UNSUPPORTED",
+      "rawText": "LC_FORMAT_UNSUPPORTED",
+      "importMs": 23,
+      "blocks": 15,
+      "characters": 56944,
+      "qualityIssues": [],
+      "fullReadExact": true,
+      "readMs": 69,
+      "pageEnd": 22
+    },
+    {
+      "test": "real-paper-import-read",
+      "name": "attention",
+      "nativePDF": "LC_FORMAT_UNSUPPORTED",
+      "rawText": "accepted",
+      "importMs": 42,
+      "blocks": 10,
+      "characters": 39629,
+      "qualityIssues": [],
+      "fullReadExact": true,
+      "readMs": 28,
+      "pageEnd": 15
+    },
+    {
+      "test": "boundary-search-and-anchor",
+      "fullTextOccurrences": 1,
+      "searchHits": 0,
+      "anchorCode": "LC_EVIDENCE_MISMATCH",
+      "blocks": 3
+    },
+    {
+      "test": "conditional-empty-model-false-completion",
+      "state": "completed_with_checks",
+      "patches": 0,
+      "requestFulfilled": false,
+      "limitation": "Controlled provider demonstrates lack of an independent goal postcondition; not a measured live model error rate"
+    },
+    {
+      "test": "30page-distant-context",
+      "pages": 30,
+      "blocks": 10,
+      "elapsedMs": 454,
+      "lateInputHasRootDefinition": false,
+      "neighbors": [
+        500
+      ],
+      "knownClaims": 0
+    }
+  ],
+  "defaultBoundary": {
+    "defaultConfig": {
+      "stateRoot": ".dsh-long-context",
+      "mode": "strict",
+      "blockTargetCodePoints": 4000,
+      "blockMaxCodePoints": 6000,
+      "maxInputBytes": 20000000,
+      "maxToolResultCodePoints": 7000,
+      "maxCheckpointCodePoints": 4500,
+      "deadlineMs": 45000,
+      "retries": 2,
+      "maxCalls": 1000,
+      "maxTokens": 2000000,
+      "maxWallMs": 14400000,
+      "maxOutputTokens": 4096,
+      "maxCorrections": 2,
+      "semanticVerification": true
+    },
+    "matchesInFullText": 1,
+    "searchHits": 0,
+    "firstBlockEnd": 4000
+  },
+  "knownClaimEviction": {
+    "pages": 30,
+    "blocks": 10,
+    "firstDefinitionRecorded": true,
+    "lateKnownClaims": 20,
+    "latePayloadHasRootDefinition": false,
+    "impacts": 30
+  },
+  "scale": {
+    "pages": 100,
+    "characters": 89652,
+    "bytes": 231052,
+    "blocks": 23,
+    "importMs": 30,
+    "provider": "controlled",
+    "semanticAccuracy": "not-measured",
+    "state": "completed_with_checks",
+    "sourceUnchanged": true,
+    "first10Ms": [
+      56,
+      45,
+      45,
+      46,
+      45,
+      44,
+      46,
+      48,
+      46,
+      48
+    ],
+    "last10Ms": [
+      95,
+      96,
+      98,
+      111,
+      106,
+      113,
+      114,
+      116,
+      119,
+      118
+    ],
+    "operationP50Ms": 71,
+    "operationP95Ms": 116,
+    "peakRSSBytes": 258277376,
+    "journalFiles": 51,
+    "journalBytes": 1768828,
+    "recoveryReadMs": 27
+  },
+  "latex": {
+    "formatCheck": {
+      "candidateRevisionId": "candidate_1323bfe7075143f3ff9dd648a44d1312",
+      "scope": "document",
+      "checkKind": "format",
+      "checker": "rules",
+      "checkerVersion": "lc-prompts/1",
+      "result": "unknown",
+      "issues": [
+        "LaTeX compiler verification requires an external checked compiler result"
+      ],
+      "evidence": [
+        "1323bfe7075143f3ff9dd648a44d13126e2e1d70728e9548ac6db81146dfe130"
+      ],
+      "createdAt": "2026-10-14T01:55:39.585Z"
+    },
+    "finishError": "LC_VERIFICATION_FAILED",
+    "publicCompilerResultWriteTool": false
+  },
+  "live": {
+    "model": "kimi-coding/k3",
+    "config": "default plugin config; maxOutputTokens=4096; temperature=0; 45s deadline; 2 retries",
+    "results": [
+      {
+        "name": "deepseek-v3",
+        "term": "DualPipe",
+        "start": "2026-10-14T01:52:04.301Z",
+        "verdict": "failed",
+        "requiredOccurrences": 16,
+        "blocks": 38,
+        "revisionId": "rev_bea1cd8d-d110-4b75-a0ca-02820521f909",
+        "fullReadExact": true,
+        "lexicalHits": 16,
+        "taskId": "task_3e2c6abe30a5230ba4daf9345a975c27",
+        "reviewed": 0,
+        "scanPass": 0,
+        "error": "Error: Scan stopped: {\"state\":\"needs_attention\",\"attention\":[\"Model/schema/evidence validation failed; range remains pending\"],\"audit\":\"The operation was aborted due to timeout\"}",
+        "elapsedMs": 136171,
+        "lastEvent": {
+          "name": "lc_scan_next",
+          "ms": 135063,
+          "isError": false
+        },
+        "audit": {
+          "state": "needs_attention",
+          "calls": 3,
+          "tokens": 34038,
+          "unknownUsage": true,
+          "reviewed": 0,
+          "errors": [
+            {
+              "elapsedMs": 45003,
+              "error": "The operation was aborted due to timeout"
+            },
+            {
+              "elapsedMs": 45001,
+              "error": "The operation was aborted due to timeout"
+            },
+            {
+              "elapsedMs": 45001,
+              "error": "The operation was aborted due to timeout"
+            }
+          ]
+        }
+      },
+      {
+        "name": "deepseek-r1",
+        "term": "DeepSeek-R1-Zero",
+        "start": "2026-10-14T01:54:20.482Z",
+        "verdict": "failed",
+        "requiredOccurrences": 52,
+        "blocks": 15,
+        "revisionId": "rev_9f8efa02-28bd-49ae-8cc8-d905a3e92590",
+        "fullReadExact": true,
+        "lexicalHits": 52,
+        "taskId": "task_70031c1cb23c7bb098766dc00e61556d",
+        "reviewed": 0,
+        "scanPass": 0,
+        "error": "Error: Scan stopped: {\"state\":\"needs_attention\",\"attention\":[\"Model/schema/evidence validation failed; range remains pending\"],\"audit\":\"The operation was aborted due to timeout\"}",
+        "elapsedMs": 135219,
+        "lastEvent": {
+          "name": "lc_scan_next",
+          "ms": 135034,
+          "isError": false
+        },
+        "audit": {
+          "state": "needs_attention",
+          "calls": 3,
+          "tokens": 33444,
+          "unknownUsage": true,
+          "reviewed": 0,
+          "errors": [
+            {
+              "elapsedMs": 45000,
+              "error": "The operation was aborted due to timeout"
+            },
+            {
+              "elapsedMs": 45001,
+              "error": "The operation was aborted due to timeout"
+            },
+            {
+              "elapsedMs": 45000,
+              "error": "The operation was aborted due to timeout"
+            }
+          ]
+        }
+      },
+      {
+        "name": "attention",
+        "term": "Transformer",
+        "start": "2026-10-14T01:56:35.710Z",
+        "verdict": "failed",
+        "requiredOccurrences": 26,
+        "blocks": 10,
+        "revisionId": "rev_7dc8d9ef-bfcd-4109-90c9-6745bf76dbe3",
+        "fullReadExact": true,
+        "lexicalHits": 26,
+        "taskId": "task_98622c3b023b32271208decc5a9ac09e",
+        "reviewed": 0,
+        "scanPass": 0,
+        "error": "Error: Scan stopped: {\"state\":\"needs_attention\",\"attention\":[\"Model/schema/evidence validation failed; range remains pending\"],\"audit\":\"The operation was aborted due to timeout\"}",
+        "elapsedMs": 135164,
+        "lastEvent": {
+          "name": "lc_scan_next",
+          "ms": 135037,
+          "isError": false
+        },
+        "audit": {
+          "state": "needs_attention",
+          "calls": 3,
+          "tokens": 33072,
+          "unknownUsage": true,
+          "reviewed": 0,
+          "errors": [
+            {
+              "elapsedMs": 45001,
+              "error": "The operation was aborted due to timeout"
+            },
+            {
+              "elapsedMs": 45001,
+              "error": "The operation was aborted due to timeout"
+            },
+            {
+              "elapsedMs": 45001,
+              "error": "The operation was aborted due to timeout"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "smoke": {
+    "provider": "kimi-coding",
+    "model": "k3",
+    "input": "Return only the JSON object {\"ok\":true}. No explanation.",
+    "maxTokens": 128,
+    "start": 1791942908521,
+    "text": "{\"ok\":true}",
+    "chunks": {
+      "block-start": 2,
+      "reasoning-delta": 15,
+      "block-end": 2,
+      "text-delta": 2,
+      "usage": 1,
+      "finish": 1
+    },
+    "usage": {
+      "inputTokens": 99,
+      "outputTokens": 50,
+      "totalTokens": 149
+    },
+    "finish": {
+      "kind": "stop"
+    },
+    "verdict": "response-received",
+    "elapsedMs": 3191
+  },
+  "longDeadline": {
+    "provider": "kimi-coding",
+    "model": "k3",
+    "maxTokens": 4096,
+    "start": 1791942969257,
+    "text": "",
+    "chunks": {
+      "block-start": 1,
+      "reasoning-delta": 1183,
+      "block-end": 1,
+      "usage": 1,
+      "finish": 1
+    },
+    "usage": {
+      "inputTokens": 0,
+      "outputTokens": 4099,
+      "totalTokens": 6552,
+      "cacheReadTokens": 2453
+    },
+    "finish": {
+      "kind": "max-tokens"
+    },
+    "verdict": "response-received",
+    "elapsedMs": 76148,
+    "inputHash": "a8d42484000517d9b7b50a320f9ba7d159790aa48a480ed777143e583d75df0b"
+  },
+  "largerBudget": {
+    "provider": "kimi-coding",
+    "model": "k3",
+    "maxTokens": 16384,
+    "start": 1791943110127,
+    "text": "{\"impacts\":[{\"quote\":\"DualPipe\",\"decision\":\"change\",\"rationale\":\"Exact case-sensitive occurrence of the supplied alias 'DualPipe' in the table-of-contents entry '3.2.1 DualPipe and Computation-Communication Overlap'; the change request explicitly covers titles and all exact occurrences, and this is a mechanical rename with no scientific content alteration. The quote is unique within this block, so the start offset is omitted per the request.\",\"claimId\":null,\"replacement\":\"DualPipe-Eval\"}],\"aliases\":[\"DualPipe\"],\"dependencies\":[],\"needsEvidence\":[]}",
+    "chunks": {
+      "block-start": 2,
+      "reasoning-delta": 1902,
+      "block-end": 2,
+      "text-delta": 39,
+      "usage": 1,
+      "finish": 1
+    },
+    "usage": {
+      "inputTokens": 0,
+      "outputTokens": 6109,
+      "totalTokens": 8562,
+      "cacheReadTokens": 2453
+    },
+    "finish": {
+      "kind": "stop"
+    },
+    "verdict": "response-received",
+    "validScanSchema": false,
+    "schemaError": "[\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"impacts\",\n      0,\n      \"claimId\"\n    ],\n    \"message\": \"Invalid input: expected string, received null\"\n  }\n]",
+    "elapsedMs": 127454,
+    "inputHash": "a8d42484000517d9b7b50a320f9ba7d159790aa48a480ed777143e583d75df0b"
+  },
+  "productionCodeChanged": false,
+  "limitations": [
+    "L3 execution blocked; no whole-document semantic quality measured",
+    "PDF external extraction is not native-format fidelity",
+    "No 51-paper retrieval or page-generation implementation",
+    "No real-provider overflow or domain blind review"
+  ],
+  "credentialsFileUnchanged": true
+}

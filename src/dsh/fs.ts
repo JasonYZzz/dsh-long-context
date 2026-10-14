@@ -6,12 +6,13 @@ import type {FilePort} from '../core/ports/index.js';
 import {hash} from '../core/util.js';
 import {invariant,LcError} from '../core/errors.js';
 export class DshFileAdapter implements FilePort {
-  constructor(private readonly ctx:Context,private readonly agent:Agent,private readonly maxBytes:number){}
+  constructor(private readonly ctx:Context,private readonly agent:Agent,private readonly maxBytes:number,private readonly stateRoot='.dsh-long-context'){}
   async canonical(path:string,signal?:AbortSignal):Promise<string>{return (await this.target(path,signal)).displayPath;}
   private async target(path:string,signal?:AbortSignal){
     const cwd=this.agent.session.header.cwd;invariant(cwd,'LC_PERMISSION_DENIED','Session must have an explicit workspace');
     const root=await this.ctx.fs.resolve(cwd,{signal}),target=await this.ctx.fs.resolve(path,{cwd,signal});
-    invariant(this.ctx.fs.contains(root,target),'LC_PERMISSION_DENIED','Document/output must be inside the session workspace');return target;
+    invariant(this.ctx.fs.contains(root,target),'LC_PERMISSION_DENIED','Document/output must be inside the session workspace');
+    const state=await this.ctx.fs.resolve(this.stateRoot,{cwd,signal});invariant(!this.ctx.fs.contains(state,target),'LC_PERMISSION_DENIED','Managed ledger paths are private; choose a document path outside stateRoot');return target;
   }
   async read(path:string,signal?:AbortSignal):Promise<Uint8Array>{
     try{const target=await this.target(path,signal);return await this.ctx.fs.readBytes(target,signal,this.maxBytes);}catch(e){throw mapFsError(e);}
