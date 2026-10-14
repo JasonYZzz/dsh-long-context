@@ -1,0 +1,18 @@
+- id: compaction-basic
+  name: dsh-long-context/compaction
+- id: tool-bash
+  disabled: true
+- id: tool-pwsh
+  disabled: true
+- id: tool-subagent
+  disabled: true
+- id: tool-workflow
+  disabled: true
+- insert:
+    - id: long-context-host
+      name: dsh-long-context/host
+      config:
+        stateRoot: .dsh-long-context
+        mode: strict
+    - id: long-context-agent
+      name: dsh-long-context/agent

@@ -1,0 +1,6 @@
+- insert:
+    - id: long-context-host
+      name: dsh-long-context/host
+      config:
+        stateRoot: .dsh-long-context
+        mode: strict

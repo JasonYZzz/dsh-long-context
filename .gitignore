@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.acceptance/
+.dsh-long-context/
+*.tgz
+.DS_Store
+coverage/
+evaluation/runs/
+tests/fixtures/generated/

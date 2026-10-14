@@ -1,0 +1,14 @@
+import {spawnSync} from 'node:child_process';
+import {readFile,readdir} from 'node:fs/promises';
+import {join} from 'node:path';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+import {home,workspace,dshCli,record,sanitize} from './runtime.mjs';
+const state=join(workspace,'.dsh-long-context'),manifestBefore=await readFile(join(state,'manifest.json'));
+const tasksBefore=await readdir(join(state,'tasks'));
+const run=args=>{const result=spawnSync(process.execPath,[dshCli,'plugin','--profile','lc-acceptance',...args],{env:{...process.env,DSH_HOME:home},encoding:'utf8'});if(result.status!==0)throw new Error(sanitize(result.stderr||result.stdout));return result;};
+run(['remove','dsh-long-context']);
+const dump=spawnSync(process.execPath,[dshCli,'--profile','lc-acceptance','--dump-config'],{env:{...process.env,DSH_HOME:home},encoding:'utf8'});
+assert.equal(dump.status,0);assert.ok(!dump.stdout.includes('preset-long-context'));assert.deepEqual(await readFile(join(state,'manifest.json')),manifestBefore);assert.deepEqual(await readdir(join(state,'tasks')),tasksBefore);
+const report=await record('uninstall',{verdict:'passed',tasksPreserved:tasksBefore.length,manifestHash:createHash('sha256').update(manifestBefore).digest('hex'),configurationRemoved:true});
+console.log(JSON.stringify({verdict:'passed',report,nextAction:'pnpm acceptance:web:rc2 reinstalls the artifact'}));

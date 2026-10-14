@@ -1,0 +1,85 @@
+{
+  "recordedClientDate": "2026-10-14",
+  "timezone": "Asia/Shanghai",
+  "installationRoot": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules",
+  "verifiedCommand": "node /Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh/lib/bin.js --version",
+  "observedVersion": "0.2.0-rc.2",
+  "observedNodeVersion": "v26.5.0",
+  "cliOnCurrentPath": false,
+  "checksPerformed": [
+    "package metadata read",
+    "CLI --version",
+    "CLI --help",
+    "published types and compiled entrypoint inspection"
+  ],
+  "notPerformed": [
+    "plugin install",
+    "Web boot",
+    "model request",
+    "actual acceptance"
+  ],
+  "packages": [
+    {
+      "name": "@deepseek-ai/dsh",
+      "version": "0.2.0-rc.2",
+      "packageJsonPath": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh/package.json",
+      "packageJsonSha256": "0a85203e3e907dd2e3bec34324a2494758ca6cdee234b07090a7c8df0b11acac"
+    },
+    {
+      "name": "@deepseek-ai/cordis",
+      "version": "4.0.4",
+      "packageJsonPath": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/cordis/package.json",
+      "packageJsonSha256": "41c9dee4715a89ef94f227384460c8445857c8faf33493eb545604a948828649"
+    },
+    {
+      "name": "@deepseek-ai/dsh-system-prompt",
+      "version": "0.2.0-rc.2",
+      "packageJsonPath": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-system-prompt/package.json",
+      "packageJsonSha256": "6d83e7a42f04ca54f86f8bc5dbbdd7cabb52968bf51c4d864a2634d70bfd1437"
+    },
+    {
+      "name": "@deepseek-ai/dsh-agent",
+      "version": "0.2.0-rc.2",
+      "packageJsonPath": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-agent/package.json",
+      "packageJsonSha256": "224385aa84ec7d522f81b169f2ac50443ead741e403a1489d6fbe78e12c73d49"
+    },
+    {
+      "name": "@deepseek-ai/dsh-tools",
+      "version": "0.2.0-rc.2",
+      "packageJsonPath": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-tools/package.json",
+      "packageJsonSha256": "fa34d96a62f4b40ee3add8e23dab87e50379781e04faeaceeddd084c258435af"
+    },
+    {
+      "name": "@deepseek-ai/dsh-fs",
+      "version": "0.2.0-rc.2",
+      "packageJsonPath": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-fs/package.json",
+      "packageJsonSha256": "7aa321549b06260f1349c328fe41f93759440d07be464bd18220fd2c6b3303ec"
+    },
+    {
+      "name": "@deepseek-ai/dsh-compaction-basic",
+      "version": "0.2.0-rc.2",
+      "packageJsonPath": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-compaction-basic/package.json",
+      "packageJsonSha256": "cd9db40db60bf84eded7b7c91856d2d6d7643b6cc7642ab0d769ef66343b1350"
+    },
+    {
+      "name": "@deepseek-ai/dsh-web-app",
+      "version": "0.2.0-rc.2",
+      "packageJsonPath": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-web-app/package.json",
+      "packageJsonSha256": "8d1324675ff120ed1ce834ddd689546deed093d41cc50faf4a5b4d6515a1b233"
+    },
+    {
+      "name": "@deepseek-ai/dsh-agent-preset",
+      "version": "0.2.0-rc.2",
+      "packageJsonPath": "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-agent-preset/package.json",
+      "packageJsonSha256": "3bb2e6e31722a08022184d0408f41b7c325174536c4e326d6f4a1cda021c7ed8"
+    }
+  ],
+  "evidenceFileHashes": {
+    "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-system-prompt/lib/types/index.d.ts": "954717f76586dc0e824f74bb51378529cf4963aff4582e3d25a7bc3c8142727d",
+    "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-agent/lib/types/runtime-types.d.ts": "07e00646b0c07eda239c102ea736a3bf29c431f34aee97fd7619ea0150d3c71a",
+    "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-compaction-basic/lib/types/index.d.ts": "8f3a2e81523980868b5b40e74fc6495238771177446f0757dad6b53e7dcb5adc",
+    "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-tools/lib/types/index.d.ts": "3536b173ec22361dcda85c05281921fc850db49984813b138d05395c4fe4510f",
+    "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-agent-loop/lib/index.js": "00c4814d63f3d1e2754eb09144832d19b30499d6ea444730473f740b587948c2",
+    "/Users/mac/.npm/_npx/1e7f6d9597241db0/node_modules/@deepseek-ai/dsh-web-app/lib/startup.js": "95a47053483fbe8ec86711369b8791bccb592c303fcc89300458a4bd07c6c252"
+  }
+}

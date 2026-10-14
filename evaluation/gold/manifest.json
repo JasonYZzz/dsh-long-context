@@ -1,0 +1,86 @@
+{
+  "fixtures": [
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-1.md",
+      "sourceHash": "3fd84f56d15e70b7a7302a4d54bbb531a05a3f81bbdb1032faee671f8373aadd",
+      "pages": 100,
+      "codePoints": 125020,
+      "requiredChanges": 25,
+      "protectedItems": 100
+    },
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-2.md",
+      "sourceHash": "667861bdf7d3c4ca7c1405fe07099712f6f3f1bf2a662f338d5914eb8733cf02",
+      "pages": 100,
+      "codePoints": 125061,
+      "requiredChanges": 23,
+      "protectedItems": 100
+    },
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-3.md",
+      "sourceHash": "f455c66de950aaf6f9e955d44cd81fa1e650a88e65159f21b3fb2cfff5650f7c",
+      "pages": 100,
+      "codePoints": 125061,
+      "requiredChanges": 23,
+      "protectedItems": 100
+    },
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-4.md",
+      "sourceHash": "6171436b28ef939bd2ad1a17d94104df55721dfb63f8a1681097d156840dd06c",
+      "pages": 100,
+      "codePoints": 125061,
+      "requiredChanges": 23,
+      "protectedItems": 100
+    },
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-5.md",
+      "sourceHash": "8d2d125f859a8ae993c7e46c0e1e1b88788bf1aaa829b817b45458377f13dfab",
+      "pages": 100,
+      "codePoints": 125061,
+      "requiredChanges": 23,
+      "protectedItems": 100
+    },
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-6.md",
+      "sourceHash": "71db3455905a9773f9f4b6ba84a139397541a4e712302f61ad7035ab74d15fda",
+      "pages": 100,
+      "codePoints": 125061,
+      "requiredChanges": 23,
+      "protectedItems": 100
+    },
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-7.md",
+      "sourceHash": "c9ef1970d3ce9df52dd83f391e17e8053812219cd993eda6f262cb7536c6f6f1",
+      "pages": 100,
+      "codePoints": 125035,
+      "requiredChanges": 24,
+      "protectedItems": 100
+    },
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-8.md",
+      "sourceHash": "6ad4be32f1f7f797b62cc97493cbc2fbc673e4fb36c1bce6da0efe8314623fa9",
+      "pages": 100,
+      "codePoints": 125035,
+      "requiredChanges": 24,
+      "protectedItems": 100
+    },
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-9.md",
+      "sourceHash": "c182c1c147acfdcac68207941ca345600e0351ac365b0622972caa549630f844",
+      "pages": 100,
+      "codePoints": 125061,
+      "requiredChanges": 23,
+      "protectedItems": 100
+    },
+    {
+      "sourcePath": "/Users/mac/dsh/dsh-long-context/.acceptance/workspace/fixtures/document-10.md",
+      "sourceHash": "f848855087426de3320bae8fc28d6cca7164972a2eb53f87f90cbb7174a2d82d",
+      "pages": 100,
+      "codePoints": 125161,
+      "requiredChanges": 23,
+      "protectedItems": 100
+    }
+  ],
+  "independentHumanReview": "not-run",
+  "note": "Generated gold is outside model workspace; model must never receive this folder"
+}
