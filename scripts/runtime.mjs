@@ -1,11 +1,11 @@
 import {createRequire} from 'node:module';
 import {mkdir,writeFile} from 'node:fs/promises';
-import {realpathSync,existsSync} from 'node:fs';
+import {realpathSync,existsSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {join,dirname,delimiter} from 'node:path';
 export const project=fileURLToPath(new URL('../',import.meta.url));
 const configuredCli=process.env.LC_DSH_CLI;
-const nativeCli=configuredCli??(process.env.PATH??'').split(delimiter).map(path=>join(path,'dsh')).find(existsSync);
+const nativeCli=configuredCli??(process.env.PATH??'').split(delimiter).map(path=>join(path,'dsh')).find(path=>existsSync(path)&&!readFileSync(realpathSync(path),'utf8').startsWith('#!/bin/sh'));
 export const dshCli=realpathSync(nativeCli??createRequire(import.meta.url).resolve('@deepseek-ai/dsh/lib/bin.js'));
 export const dshRequire=createRequire(join(dirname(dirname(dshCli)),'package.json'));
 export const nativeTarget=!!nativeCli;

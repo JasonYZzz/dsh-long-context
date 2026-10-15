@@ -12,6 +12,7 @@ import {extractPdf} from '../extractors/pdf.js';
 import {extractText} from '../extractors/text.js';
 import {ModelFailure,type FilePort,type ModelPort,type RenderPort} from './ports/index.js';
 import type {Workflow} from './workflows/types.js';
+import type {ManagedTask} from './tasks/types.js';
 import type {Anchor,Audit,Command,DocumentRevision,Identity,Task,Verification} from './types.js';
 export interface EngineOptions {store:LocalRecordStore;files:FilePort;model:ModelPort;config?:Partial<Config>;identity:Identity;renderer?:RenderPort;}
 export class LongContextEngine {
@@ -19,7 +20,7 @@ export class LongContextEngine {
   constructor(readonly options:EngineOptions){this.config=resolveConfig(options.config);invariant(options.store.workspaceId===options.identity.workspaceId,'LC_OWNER_CONFLICT','Store and identity workspace mismatch');}
   get store(){return this.options.store;}
   private async task(taskId:string,write=false):Promise<Task>{
-    const task=await this.store.task(taskId);invariant(task,'LC_INVALID_ARGUMENT','Unknown task',taskId);
+    const task=await this.store.task(taskId,false);invariant(task,'LC_INVALID_ARGUMENT','Unknown task',taskId);
     invariant(task.workspaceId===this.options.identity.workspaceId,'LC_OWNER_CONFLICT','Cross-workspace access denied');
     if(write)invariant(task.ownerSession===this.options.identity.sessionId,'LC_OWNER_CONFLICT','Session has no write ownership; explicitly resume with transferOwner');return task;
   }
@@ -68,13 +69,14 @@ export class LongContextEngine {
   async read(input:{revisionId:string;blockId:string;start?:number;end?:number;cursor?:string;taskId?:string;requestId?:string;expectedLedgerRevision?:number},signal?:AbortSignal){
     const doc=await this.store.document(input.revisionId),text=await this.store.getObject(doc.textHash);
     if(input.cursor){try{await this.source(doc,signal);}catch(e){if(e instanceof LcError&&e.code==='LC_STALE_REVISION')throw new LcError('LC_STALE_CURSOR','Source changed during cursor traversal');throw e;}}
-    const page=readRange(doc,text,input,this.config.maxToolResultCodePoints);
+    await this.source(doc,signal);
+    const page=readRange(doc,text,input,this.config.maxToolResultCodePoints-650);
     if(input.taskId){invariant(input.requestId!==undefined&&input.expectedLedgerRevision!==undefined,'LC_INVALID_ARGUMENT','Tracked reads require CAS and requestId');
       await this.mutate(input.taskId,{requestId:input.requestId,expectedLedgerRevision:input.expectedLedgerRevision},'read',{revisionId:input.revisionId,blockId:input.blockId,start:page.anchor.start,end:page.anchor.end},async(task)=>{
         invariant(task.documentRevisionId===doc.revisionId,'LC_STALE_REVISION','Read receipt baseline mismatch');task.readRanges=mergeRanges([...task.readRanges,page.completeRange]);return {anchor:page.anchor};
       },signal);
     }
-    return page;
+    return {...page,readReceipt:await this.store.readReceipt(this.options.identity.sessionId,page.anchor)};
   }
   async search(input:{revisionId:string;query:string;cursor?:string}){
     invariant(input.query.length>0,'LC_INVALID_ARGUMENT','Search query cannot be empty');
@@ -126,12 +128,12 @@ export class LongContextEngine {
     const limits=task.budget??this.config;
     invariant(task.calls<limits.maxCalls&&task.tokens<limits.maxTokens&&Date.now()-Date.parse(task.createdAt)<limits.maxWallMs,'LC_BUDGET_EXCEEDED','Model call/token/wall-clock budget exhausted');
   }
-  async analyze<T>(task:Task|Workflow,prompt:string,parse:(value:unknown)=>T,signal?:AbortSignal,purpose='analysis'):Promise<T|null>{
+  async analyze<T>(task:Task|Workflow|ManagedTask,prompt:string,parse:(value:unknown)=>T,signal?:AbortSignal,purpose='analysis',promptVersion=PROMPT_VERSION):Promise<T|null>{
     let attemptPrompt=prompt,previousError:string|null=null;
     for(let attempt=0;attempt<=this.config.retries;attempt++){
       try{this.checkBudget(task);const limits='budget' in task&&task.budget?task.budget:this.config;invariant(task.tokens+Buffer.byteLength(attemptPrompt,'utf8')+256+(this.config.auxiliaryModel.maxOutputTokens??this.config.maxOutputTokens)<=limits.maxTokens,'LC_BUDGET_EXCEEDED','Input/output reservation exceeds remaining token budget');}catch(e){task.state='needs_attention';task.attention.push((e as Error).message);return null;}
       checkSignal(signal);const started=Date.now(),deadline=AbortSignal.timeout(this.config.auxiliaryModel.deadlineMs??this.config.deadlineMs),fused=signal?AbortSignal.any([signal,deadline]):deadline;task.calls++;
-      let audit:Audit={purpose,retryReason:previousError,promptVersion:PROMPT_VERSION,inputHash:await this.store.putObject(attemptPrompt),outputHash:await this.store.putObject(''),model:'unknown',provider:'unknown',usage:null,finishReason:'error',elapsedMs:0,error:null};
+      let audit:Audit={purpose,retryReason:previousError,promptVersion,inputHash:await this.store.putObject(attemptPrompt),outputHash:await this.store.putObject(''),model:'unknown',provider:'unknown',usage:null,finishReason:'error',elapsedMs:0,error:null};
       try{
         const response=await this.options.model.generate(attemptPrompt,fused);audit={...audit,model:response.model,provider:response.provider,usage:response.usage,finishReason:response.finishReason,reasoningChunks:response.reasoningChunks,outputHash:await this.store.putObject(response.text)};
         invariant(response.finishReason==='stop'||response.finishReason==='end-turn','LC_MODEL_INCOMPLETE',`Model ended with ${response.finishReason}`);
@@ -140,7 +142,7 @@ export class LongContextEngine {
       }catch(e){
         if(e instanceof ModelFailure){const r=e.response;audit={...audit,model:r.model,provider:r.provider,usage:r.usage,finishReason:r.finishReason,reasoningChunks:r.reasoningChunks,outputHash:await this.store.putObject(r.text)};}
         audit.error=e instanceof Error?e.message:String(e);audit.elapsedMs=Date.now()-started;this.account(task,audit,attemptPrompt);task.audits.push(audit);
-        if(signal?.aborted){task.state='cancelled';task.attention=['Operation cancelled; audit persisted, no block marked reviewed'];if('taskKind' in task)await this.store.commitWorkflow(task,task.journalRevision,id('cancel'));else await this.store.commit(task,task.journalRevision,id('cancel'));signal.throwIfAborted();}
+        if(signal?.aborted){task.state='cancelled';task.attention=['Operation cancelled; no incomplete range counted as complete'];if(task.schemaVersion!==3){if('taskKind' in task)await this.store.commitWorkflow(task,task.journalRevision,id('cancel'));else await this.store.commit(task,task.journalRevision,id('cancel'));}signal.throwIfAborted();}
         if(audit.error===previousError)break;
         previousError=audit.error;
         attemptPrompt=prompt.replace('Input:\n',`Previous attempt failed validation: ${JSON.stringify(audit.error.slice(0,1500))}. Correct this error using only the supplied source evidence.\nInput:\n`);
@@ -280,6 +282,7 @@ export class LongContextEngine {
     },signal);
   }
   async finish(taskId:string,cmd:Command,candidateRevisionId:string,signal?:AbortSignal){
+    await this.store.task(taskId,true);
     return this.mutate(taskId,cmd,'finish',{candidateRevisionId},async(task,doc)=>{
       invariant(task.candidate?.candidateRevisionId===candidateRevisionId,'LC_STALE_REVISION','Candidate revision mismatch');
       const issues=completionIssues(task,doc,this.config.semanticVerification);invariant(issues.length===0,'LC_VERIFICATION_FAILED',issues.join('; '));task.state='completed_with_checks';
@@ -318,16 +321,17 @@ export class LongContextEngine {
   }
   async status(taskId:string,cursor=0){
     const task=await this.task(taskId),doc=await this.store.document(task.documentRevisionId);invariant(Number.isInteger(cursor)&&cursor>=0,'LC_INVALID_ARGUMENT','Invalid status offset');
-    const entries=[...task.impacts.map(i=>({kind:'impact',value:i})),...task.dependencies.map(d=>({kind:'dependency',value:d}))];
+    const preview=(text:string)=>slice(text,0,160);
+    const entries=[...task.impacts.map(i=>({kind:'impact',value:{itemId:i.itemId,anchor:i.anchor,decision:i.decision,status:i.status,evidencePreview:preview(i.evidence),replacementPreview:i.replacement===null?null:preview(i.replacement),rationalePreview:preview(i.rationale),detailsAction:'lc_task_detail'}})),...task.dependencies.map(d=>({kind:'dependency',value:{edgeId:d.edgeId,from:d.from,to:d.to,critical:d.critical,resolution:d.resolution,detailsAction:'lc_task_detail'}}))];
     const selected:typeof entries=[];let next=cursor;
     let freshness:'current'|'stale'|'unavailable'='current';try{await this.source(doc);if(task.candidate?.status==='committed')invariant(hash(await this.options.files.read(task.candidate.path))===task.candidate.contentHash,'LC_STALE_REVISION','Candidate changed');}catch(error){freshness=error instanceof LcError&&error.code==='LC_STALE_REVISION'?'stale':'unavailable';}
     const base={...this.summary(task,doc),freshness};for(;next<entries.length;next++){const proposed={...base,entries:[...selected,entries[next]],nextCursor:next+1};if(length(JSON.stringify(proposed))>this.config.maxToolResultCodePoints)break;selected.push(entries[next]!);}
     invariant(next>cursor||cursor>=entries.length,'LC_RESULT_BUDGET_TOO_SMALL','An impact exceeds status budget; use lc_read and export report');
     return {...base,entries:selected,nextCursor:next<entries.length?next:null};
   }
+  async detail(taskId:string,itemId:string,cursor=0){const task=await this.task(taskId,true),entry=task.impacts.find(i=>i.itemId===itemId)??task.dependencies.find(d=>d.edgeId===itemId);invariant(entry,'LC_INVALID_ARGUMENT','Unknown impact or dependency');invariant(Number.isInteger(cursor)&&cursor>=0,'LC_INVALID_ARGUMENT','Invalid detail cursor');const text=canonical(entry),end=Math.min(length(text),cursor+Math.max(1,Math.floor((this.config.maxToolResultCodePoints-500)/6)));invariant(cursor<=length(text),'LC_INVALID_ARGUMENT','Detail cursor exceeds entry');return {taskId,itemId,text:slice(text,cursor,end),nextCursor:end<length(text)?end:null,total:length(text)};}
   async activeTask():Promise<Task|null>{
-    const tasks=(await Promise.all((await this.store.taskIds()).map(taskId=>this.store.task(taskId)))).filter((t):t is Task=>!!t&&t.ownerSession===this.options.identity.sessionId&&!['completed_with_checks','cancelled','failed'].includes(t.state));
-    return tasks.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))[0]??null;
+    for(const record of await this.store.activeRecords(this.options.identity.sessionId)){if(record.kind!=='tasks')continue;const task=await this.store.task(record.taskId,false);if(task&&task.ownerSession===this.options.identity.sessionId&&!['completed_with_checks','cancelled','failed'].includes(task.state))return task;}return null;
   }
   async buildCheckpoint(taskId:string){const task=await this.task(taskId);return checkpoint(task,await this.store.document(task.documentRevisionId),this.config.maxCheckpointCodePoints);}
   async correction(taskId:string,signal?:AbortSignal):Promise<string|null>{
@@ -335,6 +339,7 @@ export class LongContextEngine {
       task.corrections++;await this.store.commit(task,task.journalRevision,id('correction'));return `Task ${taskId} is ${task.state}; authoritative completion requires lc_finish. Next: ${nextOperation(task)}. Read current lc_status before writing.`;});
   }
   async exportReport(taskId:string,cmd:Command,input:{outputPath:string;format?:'json'|'markdown'},signal?:AbortSignal){
+    await this.store.task(taskId,true);
     return this.mutate(taskId,cmd,'export',input,async(task,doc)=>{
       const report={schemaVersion:2,taskId:task.taskId,journalRevision:task.journalRevision+1,state:task.state,baseline:doc,candidate:task.candidate,candidateHistory:task.candidateHistory,goal:task.goal,
         coverage:coverage(task,doc),impacts:task.impacts,dependencies:task.dependencies,plan:task.plan,checks:task.checks,audits:task.audits,

@@ -11,5 +11,5 @@ it('retains current checkpoint in actual requests across manual, pressure and co
   await exec(process.execPath,['scripts/acceptance-mechanisms.mjs'],{cwd:process.cwd(),timeout:150000,maxBuffer:2_000_000});
   const report=JSON.parse(await readFile(resolve('evaluation/runs/mechanisms/result.json'),'utf8'));
   expect(report.verdict).toBe('passed');expect(report.manual).toBe(true);expect(report.overflowSummaries).toBeGreaterThan(0);expect(report.pressureSummaries).toBeGreaterThan(0);
-  expect(report.semanticQuality).toBe('not-evaluated');
+  expect(report.genericDefault).toBe(true);expect(report.directAnswerWithoutTask).toBe(true);expect(report.genericCompaction).toBe(true);expect(report.lazyLegacyResume).toBe(true);expect(report.semanticQuality).toBe('not-evaluated');
 },360000);

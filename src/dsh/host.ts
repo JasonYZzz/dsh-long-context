@@ -17,7 +17,7 @@ import {assertCompatibility} from './compatibility.js';
 declare module '@deepseek-ai/cordis' {interface Context {longContext:LongContextHub;}}
 export class LongContextHub extends Service {
   static inject=['fs','llm'];
-  static Config=z.object({rendererExecutable:z.string(),rendererFontconfigFile:z.string(),auxiliaryModel:z.object({provider:z.string(),model:z.string(),reasoningEffort:z.string(),maxOutputTokens:z.number(),deadlineMs:z.number()}),stateRoot:z.string().default('.dsh-long-context'),mode:z.union(['strict','advisory']).default('strict'),
+  static Config=z.object({rendererExecutable:z.string(),rendererFontconfigFile:z.string(),legacyTools:z.boolean().default(false),auxiliaryModel:z.object({provider:z.string(),model:z.string(),reasoningEffort:z.string(),maxOutputTokens:z.number(),deadlineMs:z.number()}),stateRoot:z.string().default('.dsh-long-context'),mode:z.union(['strict','advisory']).default('strict'),
     maxEvidenceCodePoints:z.number(),blockTargetCodePoints:z.number(),blockMaxCodePoints:z.number(),maxInputBytes:z.number(),maxToolResultCodePoints:z.number(),maxCheckpointCodePoints:z.number(),
     deadlineMs:z.number(),retries:z.number(),maxCalls:z.number(),maxTokens:z.number(),maxWallMs:z.number(),maxOutputTokens:z.number(),maxCorrections:z.number(),semanticVerification:z.boolean()});
   readonly config:Config;

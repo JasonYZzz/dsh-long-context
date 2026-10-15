@@ -1,7 +1,7 @@
 {
   "name": "dsh-long-context",
-  "version": "0.3.0-beta.1",
-  "description": "DSH Web workspace for evidence-bound long-document editing, literature screening and chapter-aware generation",
+  "version": "0.4.0-beta.1",
+  "description": "DSH workspace for model-directed long-context work with bounded execution, evidence and resumable delivery",
   "type": "module",
   "license": "MIT",
   "packageManager": "pnpm@11.1.2",
@@ -90,7 +90,9 @@
     "acceptance:pdf": "node scripts/acceptance-pdf.mjs",
     "evaluate:performance": "node scripts/evaluate-performance.mjs",
     "evaluate:relevance": "node scripts/evaluate-relevance.mjs",
-    "evaluate:optimization-report": "node scripts/export-optimization-evidence.mjs"
+    "evaluate:optimization-report": "node scripts/export-optimization-evidence.mjs",
+    "evaluate:general-performance": "node scripts/evaluate-general-performance.mjs",
+    "evaluate:general-model": "node scripts/evaluate-general-model.mjs"
   },
   "dependencies": {
     "pdfjs-dist": "6.4.299",

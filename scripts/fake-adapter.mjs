@@ -12,13 +12,16 @@ export class AcceptanceAdapter extends LlmAdapter {
     let text='Controlled fixture response. Task progress remains authoritative in the ledger.';
     if(options.purpose==='compaction')text='A controlled conversation summary. Recover source evidence through lc_read and task state through lc_status.';
     const input=options.messages.filter(m=>m.role==='user').flatMap(m=>m.content).filter(b=>b.type==='text').map(b=>b.text).at(-1)??'';
-    if(input.startsWith('You review every supplied source block')){
+    if(input.startsWith('You execute one bounded work window')){
+      const p=JSON.parse(input.split('Input:\n')[1]);this.calls.at(-1).purpose='managed-work';
+      text=JSON.stringify(input.includes('Independently review')?{passed:true,issues:[],unitIds:p.units.map(u=>u.unitId)}:input.includes('Synthesize the supplied')?{text:'Combined controlled result',assessment:{satisfied:true,issues:[]}}:{results:p.units.map(u=>({unitId:u.unitId,text:u.input.map(i=>i.text).join('')||`Controlled ${u.unitId}`,summary:'Controlled result',assessment:{satisfied:true,issues:[]}}))});
+    }else if(input.startsWith('You review every supplied source block')){
       const payload=JSON.parse(input.split('Input:\n')[1]),source=payload.block.text,quote='当前阈值为10。',index=source.indexOf(quote);
       text=JSON.stringify({impacts:index>=0?[{quote,start:Array.from(source.slice(0,index)).length,decision:'change',rationale:'Requested threshold update',claimId:'threshold',replacement:'当前阈值为20。'}]:[],aliases:[],dependencies:[],needsEvidence:[]});
     }else if(input.startsWith('Generate the next logical page')){const p=JSON.parse(input.split('Input:\n')[1]);text=JSON.stringify({text:`Controlled unit ${p.index+1}: ${p.sources[0].text.slice(0,120)} [${p.sources[0].revisionId}]`,summary:`Controlled summary for unit ${p.index+1}`,citations:[{revisionId:p.sources[0].revisionId,quoteId:'q0'}]});
     }else if(input.startsWith('Independently verify ONLY this logical page')){text=JSON.stringify({passed:true,issues:[],evidenceIds:['e0']});
     }else if(input.startsWith('Independently compare')){const payload=JSON.parse(input.split('Input:\n')[1]);text=JSON.stringify({passed:true,issues:[],evidence:[payload.candidate.slice(0,20)]});}
     yield {type:'block-start',index:0,blockType:'text'};yield {type:'text-delta',index:0,text};yield {type:'block-end',index:0,block:{type:'text',text}};
-    yield {type:'usage',usage:{inputTokens:100,outputTokens:40}};yield {type:'finish',reason:{kind:'stop'}};
+    yield {type:'usage',usage:{inputTokens:Math.ceil(JSON.stringify(options.messages).length/4),outputTokens:40}};yield {type:'finish',reason:{kind:'stop'}};
   }
 }

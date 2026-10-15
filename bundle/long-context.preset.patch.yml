@@ -4,7 +4,7 @@
       config:
         id: long-context
         name: Long Context
-        description: Evidence-bound document editing with a persistent task ledger
+        description: Model-directed long-context work with bounded execution and resumable delivery
         order: 5
         plugins:
           - id: long-context-agent

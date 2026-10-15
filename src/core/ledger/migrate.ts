@@ -18,7 +18,7 @@ export async function migrateV1(store:LocalRecordStore){
     await mkdir(target,{recursive:true,mode:0o700});
     // Remove only an uncommitted migration generation while the v1 manifest still owns the workspace.
     for(const entry of await readdir(target))await rm(join(target,entry),{recursive:true,force:true});
-    const migrated=new LocalRecordStore(target,store.workspaceId);await migrated.init();
+    const migrated=new LocalRecordStore(target,store.workspaceId,2);await migrated.init();
     const docs=new Map<string,ReturnType<typeof documentSchema.parse>>(),texts=new Map<string,string[]>();
     for(const filename of await readdir(join(store.root,'documents'))){
       if(!filename.endsWith('.json'))continue;

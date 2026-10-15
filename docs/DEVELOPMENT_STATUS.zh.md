@@ -1,3 +1,5 @@
+> 2026-10-15：当前版本已更新为 0.4.0-beta.1。请以[通用优化执行报告](GENERAL_OPTIMIZATION_EXECUTION_REPORT.zh.md)和[README](../README.md)为准；以下为历史验收记录。
+
 > Web 0.3.0-beta.1 的本地安装与界面验收见 [Web 部署报告](WEB_DEPLOYMENT_REPORT.zh.md)。此前核心优化见 [0.2.0 优化执行报告](OPTIMIZATION_EXECUTION_REPORT.zh.md)。以下保留旧版验收历史，不能用于判断新版已经通过完整需求。
 
 # 开发状态

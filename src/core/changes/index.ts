@@ -2,7 +2,7 @@ import type {DocumentRevision,Patch,Plan,Task} from '../types.js';
 import {validateAnchor} from '../document/index.js';
 import {canonical,hash,points} from '../util.js';
 import {invariant} from '../errors.js';
-export function makePlan(task:Task,doc:DocumentRevision,text:string,replacements:Record<string,string>):Plan {
+export function makePlan(task:Pick<Task,'impacts'|'goalHash'>&{goal:Pick<Task['goal'],'protectedAnchors'>},doc:DocumentRevision,text:string,replacements:Record<string,string>):Plan {
   const patches:Patch[]=[],chars=points(text),protectedRanges=[...task.goal.protectedAnchors,...task.impacts.filter(i=>i.decision==='keep').map(i=>i.anchor)];
   for(const item of task.impacts){
     invariant(item.decision!=='uncertain','LC_COVERAGE_INCOMPLETE','Uncertain impact must be resolved',item.itemId);

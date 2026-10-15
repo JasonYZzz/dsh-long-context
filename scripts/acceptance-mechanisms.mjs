@@ -10,9 +10,11 @@ import {AcceptanceAdapter} from './fake-adapter.mjs';
 const runId=Date.now();
 const {ctx,shutdown}=await boot();const handles=[];const adapter=new AcceptanceAdapter();
 try{
+  ctx.longContext.config.legacyTools=false;
   ctx.llm.registerAdapter(['lc-fixture'],adapter);
   const create=async(suffix,preset='long-context',cwd=workspace)=>{const handle=await ctx.agents.create({sessionId:SessionId(`mechanisms-${suffix}-${Date.now()}`),meta:{cwd,agentPreset:preset},
     agentOptions:{provider:'lc-fixture',model:'fixture',maxTokens:2048},setup:async agentCtx=>{await ctx.agentPresets.mount(agentCtx,preset);}});handles.push(handle);return handle.agent;};
+  const bootstrap=await create('bootstrap');assert.ok(!bootstrap.ctx.tools.schemas(bootstrap).some(t=>t.name==='lc_task_start'));ctx.longContext.config.legacyTools=true;
   const agent=await create('A'),controller=new AbortController();let seq=0;
   const tool=async(name,args,who=agent)=>{const result=await who.ctx.tools.execute({callId:ToolCallId(`mechanism-${++seq}`),name,arguments:args,agent:who,signal:controller.signal});
     assert.equal(result.isError,false,JSON.stringify(result));assert.equal(result.value.ok,true,JSON.stringify(result.value));return result.value.data;};
@@ -48,7 +50,7 @@ try{
   await ctx.agentPresets.register({id:'lc-pressure',plugins});const pressure=await create('pressure','lc-pressure');
   const pressureEngine=await ctx.longContext.engine(pressure.ctx,pressure);const pressureFile=join(workspace,`pressure-${runId}.md`);await writeFile(pressureFile,'Current evidence for a separate task.');
   const pressureDoc=await pressureEngine.importDocument({path:pressureFile});const pressureTask=await pressureEngine.start({revisionId:pressureDoc.revisionId,request:'Review evidence'},{requestId:'pressure-start',expectedLedgerRevision:0});
-  const pressureIndex=adapter.calls.length;await speak('Controlled pressure content. '+ 'pressure history '.repeat(12000),pressure);await speak('Next actual pressure request.',pressure);
+  const pressureIndex=adapter.calls.length;await speak('Controlled pressure content. '+ 'pressure history '.repeat(12000),pressure);await speak('Recent retained context. '+ 'recent evidence '.repeat(600),pressure);await speak('Next actual pressure request.',pressure);
   const pressureCalls=adapter.calls.slice(pressureIndex);assert.ok(pressureCalls.some(c=>c.purpose==='compaction'),'pressure did not trigger compaction');assert.ok(pressureCalls.filter(c=>c.purpose==='conversation').every(c=>JSON.stringify(c.messages).includes(pressureTask.taskId)));
   // Complete the managed text workflow through the actual ToolRuntime after compression.
   const command=async()=>({taskId,requestId:`workflow-${++seq}`,expectedLedgerRevision:(await tool('lc_status',{taskId})).journalRevision});
@@ -62,8 +64,21 @@ try{
   const generation=await create('generation');const flow=await tool('lc_generate_start',{goal:{title:'Controlled context recovery',outline:Array.from({length:30},(_,i)=>`Unit ${i+1}`),pages:30,revisionIds:[imported.revisionId]},requestId:'generation-start',expectedLedgerRevision:0},generation);
   const flowCommand=async()=>({taskId:flow.taskId,requestId:`flow-${++seq}`,expectedLedgerRevision:(await tool('lc_status',{taskId:flow.taskId},generation)).journalRevision});
   await tool('lc_generate_next',await flowCommand(),generation);await speak('Controlled generation history '+ 'previous chapter history '.repeat(12000),generation);const generationCompactor=ctx.agentPresets.serviceFor(generation,'compaction');assert.ok(await generationCompactor.compactNow(generation,controller.signal));assert.ok(generation.session.deriveMessages().some(m=>m.content.some(b=>b.type==='text'&&b.text.includes(flow.taskId))));const flowIndex=adapter.calls.length;await speak('Continue the generation task after manual compaction.',generation);assert.ok(adapter.calls.slice(flowIndex).filter(c=>c.purpose==='conversation').every(c=>JSON.stringify(c.messages).includes(flow.taskId)));await tool('lc_generate_next',await flowCommand(),generation);assert.equal((await tool('lc_status',{taskId:flow.taskId},generation)).total,2);
+  // Default tools use the generic protocol; small Q&A does not persist a task.
+  ctx.longContext.config.legacyTools=false;const genericWorkspace=join(workspace,`generic-${runId}`);await mkdir(genericWorkspace,{recursive:true});const generic=await create('generic','long-context',genericWorkspace);
+  const names=generic.ctx.tools.schemas(generic).map(t=>t.name);assert.ok(names.includes('lc_work')&&!names.includes('lc_task_start'));
+  const genericEngine=await ctx.longContext.engine(generic.ctx,generic),before=(await genericEngine.store.recordIds('managed')).length;
+  await speak('What is 2 plus 2? Answer directly.',generic);assert.equal((await genericEngine.store.recordIds('managed')).length,before);
+  let genericReceipt=await tool('lc_work',{contract:{request:'Write three short coherent parts'},units:[0,1,2].map(n=>({unitId:`part_${n}`,instruction:`Write part ${n}`})),window:{maxUnits:1},requestId:'generic-start',expectedLedgerRevision:0},generic);
+  assert.equal(genericReceipt.state,'running');await speak('Controlled generic context '+ 'older context '.repeat(12000),generic);
+  assert.ok(await ctx.agentPresets.serviceFor(generic,'compaction').compactNow(generic,controller.signal));
+  const genericIndex=adapter.calls.length;await speak('Continue the current managed task after compression.',generic);assert.ok(adapter.calls.slice(genericIndex).filter(c=>c.purpose==='conversation').every(c=>JSON.stringify(c.messages).includes(genericReceipt.taskId)));
+  for(let n=0;n<10&&genericReceipt.state==='running';n++){const current=await tool('lc_status',{taskId:genericReceipt.taskId},generic);genericReceipt=await tool('lc_continue',{taskId:current.taskId,requestId:`generic-${n}`,expectedLedgerRevision:current.journalRevision},generic);}
+  assert.equal(genericReceipt.state,'completed_with_checks');
+  const compatFile=join(genericWorkspace,'compat.md');await writeFile(compatFile,'Current evidence for compatibility recovery.');const legacyDoc=await genericEngine.importDocument({path:compatFile}),legacyStart=await genericEngine.start({revisionId:legacyDoc.revisionId,request:'Review old task'},{requestId:'compat-start',expectedLedgerRevision:0});
+  await tool('lc_resume',{taskId:legacyStart.taskId,requestId:'compat-resume',expectedLedgerRevision:legacyStart.journalRevision},generic);assert.ok(generic.ctx.tools.schemas(generic).some(t=>t.name==='lc_scan_next'));
   const report=await record('mechanisms',{verdict:'passed',layer:'L2-controlled-provider',ids:['DOC-01/02/03','ENV-02','EDIT-04','CTX-01','CTX-02','CTX-03','CTX-04-controlled','STOP-01'],
-    generationCheckpoint:true,generationUnitsAfterCompaction:2,manual:!!manual,overflowSummaries:overflowCalls.filter(c=>c.purpose==='compaction').length,pressureSummaries:pressureCalls.filter(c=>c.purpose==='compaction').length,
+    genericDefault:true,directAnswerWithoutTask:true,genericCompaction:true,lazyLegacyResume:true,generationCheckpoint:true,generationUnitsAfterCompaction:2,manual:!!manual,overflowSummaries:overflowCalls.filter(c=>c.purpose==='compaction').length,pressureSummaries:pressureCalls.filter(c=>c.purpose==='compaction').length,
     requestCount:adapter.calls.length,taskId,checkpoint,liveProviderOverflow:'not-run',semanticQuality:'not-evaluated'});
   // Full synthetic request envelopes are local reproducibility evidence, never user conversations.
   await writeFile(join(report,'requests.json'),JSON.stringify(adapter.calls,null,2));

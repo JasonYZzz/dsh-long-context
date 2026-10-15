@@ -9,7 +9,7 @@ export class DshModelAdapter implements ModelPort {
   constructor(private readonly ctx:Context,private readonly agent:Agent,private readonly maxOutputTokens:number,private readonly options:Config['auxiliaryModel']={}){}
   async generate(input:string,signal:AbortSignal):Promise<ModelResponse>{
     const current=this.agent.session.requestHeader()?.config,provider=this.options.provider??current?.provider??this.agent.options.provider,model=this.options.model??current?.model??this.agent.options.model;
-    invariant(provider&&model,'LC_MODEL_UNAVAILABLE','Select a DSH provider/model before scanning');
+    invariant(provider&&model,'LC_MODEL_UNAVAILABLE','Select a DSH provider/model before managed work');
     const maxTokens=this.options.maxOutputTokens??this.maxOutputTokens;
     const reasoningEffort=this.options.reasoningEffort?ReasoningEffortId(this.options.reasoningEffort):current?.reasoningEffort??this.agent.options.reasoningEffort;
     const info=await this.ctx.llm.resolveModelInfo(provider,model,signal);

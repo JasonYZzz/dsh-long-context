@@ -10,7 +10,7 @@ export function canonical(value: unknown): string {
   if (value !== null && typeof value === 'object') return `{${Object.entries(value).filter(([,v]) => v !== undefined).sort(([a],[b]) => a.localeCompare(b)).map(([k,v]) => `${JSON.stringify(k)}:${canonical(v)}`).join(',')}}`;
   const result = JSON.stringify(value); invariant(result !== undefined, 'LC_INVALID_ARGUMENT', 'Value is not JSON'); return result;
 }
-export function safeId(value: string): string { invariant(/^[a-zA-Z0-9_-]{1,160}$/.test(value), 'LC_INVALID_ARGUMENT', 'Invalid identifier'); return value; }
+export function safeId(value: string): string { invariant(/^[a-zA-Z0-9_-]{1,160}$/.test(value)&&!['__proto__','constructor','prototype'].includes(value), 'LC_INVALID_ARGUMENT', 'Invalid identifier'); return value; }
 export function checkSignal(signal?: AbortSignal): void { signal?.throwIfAborted(); }
 export function mergeRanges(ranges: readonly {start:number;end:number}[]): {start:number;end:number}[] {
   const merged: {start:number;end:number}[] = [];

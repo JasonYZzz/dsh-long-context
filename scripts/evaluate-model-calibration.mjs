@@ -4,7 +4,7 @@ import {dshImport,project,record} from './runtime.mjs';
 import {bootModel} from './model-runtime.mjs';
 const directory=join(project,'evaluation/runs/model-calibration'),{ctx,shutdown,selected,assertCredentialsUnchanged}=await bootModel(directory);
 const {SessionId}=await dshImport('@deepseek-ai/dsh-session'),{ToolCallId}=await dshImport('@deepseek-ai/dsh-llm');let handle,sequence=0;
-const result={provider:selected.provider,model:selected.model,parameters:{reasoningEffort:'off',maxOutputTokens:8192,deadlineMs:120000},verdict:'running'};
+const result={provider:selected.provider,model:selected.model,parameters:{reasoningEffort:selected.reasoningEffort??'route default',maxOutputTokens:8192,deadlineMs:120000},verdict:'running'};
 try{
   const workspace=join(directory,'workspace');await mkdir(workspace,{recursive:true});const source=join(workspace,'source.md');await writeFile(source,'# Current method\n当前阈值为10。\n历史研究阈值为10，不应修改。\n');
   handle=await ctx.agents.create({sessionId:SessionId(`calibration-${Date.now()}`),meta:{cwd:workspace,agentPreset:'long-context'},agentOptions:{provider:selected.provider,model:selected.model},setup:async c=>{await ctx.agentPresets.mount(c,'long-context');}});

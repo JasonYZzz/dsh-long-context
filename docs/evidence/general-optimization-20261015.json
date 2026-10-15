@@ -1,0 +1,439 @@
+{
+  "recordedAt": "2026-10-15T00:25:28.828Z",
+  "pluginVersion": "0.4.0-beta.1",
+  "baseline": "a731f9c",
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "fullSuite": {
+      "tests": 74,
+      "passed": 74,
+      "files": 10
+    },
+    "additionalInterruptedWriteRegression": "passed",
+    "nativeLoader": "passed",
+    "controlledCompaction": "passed",
+    "preflight": "passed",
+    "finalTarballInstall": "passed",
+    "unknownRemoteRetryReservation": "passed",
+    "intermediateSynthesisRead": "passed"
+  },
+  "performance": {
+    "verdict": "passed",
+    "scope": "One same-machine controlled sample, exact result independently asserted; no semantic quality or physical-page claim",
+    "baseline": "a731f9c",
+    "rows": [
+      {
+        "name": "baseline",
+        "sourceBytes": 956291,
+        "codePoints": 374291,
+        "blocks": 94,
+        "replacements": 6000,
+        "importMs": 306,
+        "elapsedMs": 43335,
+        "recoveryMs": 3872,
+        "journalBytes": 260112977,
+        "journalEvents": 100,
+        "mutatingCommands": 99,
+        "modelCalls": 0,
+        "metrics": null
+      },
+      {
+        "name": "managed",
+        "sourceBytes": 956291,
+        "codePoints": 374291,
+        "blocks": 94,
+        "replacements": 6000,
+        "importMs": 290,
+        "elapsedMs": 670,
+        "recoveryMs": 1,
+        "journalBytes": 6586,
+        "journalEvents": 5,
+        "mutatingCommands": 1,
+        "modelCalls": 0,
+        "metrics": {
+          "journalBytesRead": 23220,
+          "journalBytesWritten": 6586,
+          "recordReads": 13,
+          "fullAudits": 1,
+          "snapshotReads": 0,
+          "objectWrites": 3
+        }
+      }
+    ],
+    "improvement": {
+      "journalBytes": 0.9999746802328897,
+      "recoveryMs": 0.99974173553719,
+      "elapsedMs": 0.9845390561901466
+    }
+  },
+  "models": {
+    "initial": {
+      "provider": "deepseek-official",
+      "model": "deepseek-flash",
+      "parameters": {
+        "maxOutputTokens": 4096,
+        "temperature": 0,
+        "reasoningEffort": "route default",
+        "retries": 0
+      },
+      "verdict": "execution-failures",
+      "credentialsUnchanged": true,
+      "rows": [
+        {
+          "id": "mapped",
+          "pair": [
+            {
+              "route": "direct",
+              "state": "returned",
+              "calls": 1,
+              "elapsedMs": 6084,
+              "usage": {
+                "input": 249,
+                "output": 1079
+              }
+            },
+            {
+              "route": "managed",
+              "state": "needs_attention",
+              "calls": 1,
+              "elapsedMs": 914407,
+              "usage": {
+                "input": 0,
+                "output": 0
+              },
+              "attention": [
+                "Model validation failed; range remains pending. The operation was aborted due to timeout"
+              ],
+              "units": 1,
+              "journalRevision": 3
+            },
+            {
+              "route": "legacy-a731f9c",
+              "state": "needs_attention",
+              "calls": 1,
+              "elapsedMs": 17984,
+              "attention": [
+                "Model validation failed; range remains pending. Model ended with error"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "synthesis",
+          "pair": [
+            {
+              "route": "managed",
+              "state": "completed_with_checks",
+              "calls": 1,
+              "elapsedMs": 12487,
+              "usage": {
+                "input": 496,
+                "output": 1810
+              },
+              "attention": [],
+              "units": 1,
+              "journalRevision": 5
+            },
+            {
+              "route": "direct",
+              "state": "returned",
+              "calls": 1,
+              "elapsedMs": 5882,
+              "usage": {
+                "input": 199,
+                "output": 831
+              }
+            }
+          ]
+        },
+        {
+          "id": "collection",
+          "pair": [
+            {
+              "route": "direct",
+              "state": "returned",
+              "calls": 1,
+              "elapsedMs": 2840,
+              "usage": {
+                "input": 149,
+                "output": 205
+              }
+            },
+            {
+              "route": "managed",
+              "state": "completed_with_checks",
+              "calls": 1,
+              "elapsedMs": 24956,
+              "usage": {
+                "input": 436,
+                "output": 3912
+              },
+              "attention": [],
+              "units": 1,
+              "journalRevision": 5
+            }
+          ]
+        },
+        {
+          "id": "dependency",
+          "pair": [
+            {
+              "route": "managed",
+              "state": "completed_with_checks",
+              "calls": 2,
+              "elapsedMs": 22173,
+              "usage": {
+                "input": 1239,
+                "output": 3050
+              },
+              "attention": [],
+              "units": 1,
+              "journalRevision": 7
+            },
+            {
+              "route": "direct",
+              "state": "returned",
+              "calls": 1,
+              "elapsedMs": 2973,
+              "usage": {
+                "input": 154,
+                "output": 303
+              }
+            }
+          ]
+        }
+      ],
+      "native": [
+        {
+          "preset": "standard",
+          "elapsedMs": 2155,
+          "noManagedTask": true
+        },
+        {
+          "preset": "long-context",
+          "elapsedMs": 3576,
+          "noManagedTask": true
+        }
+      ]
+    },
+    "mappedRetest": {
+      "provider": "deepseek-official",
+      "model": "deepseek-flash",
+      "parameters": {
+        "maxOutputTokens": 4096,
+        "temperature": 0,
+        "reasoningEffort": "route default",
+        "retries": 0
+      },
+      "verdict": "execution-passed-quality-unscored",
+      "credentialsUnchanged": true,
+      "rows": [
+        {
+          "id": "mapped",
+          "pair": [
+            {
+              "route": "direct",
+              "state": "returned",
+              "calls": 1,
+              "elapsedMs": 3618,
+              "usage": {
+                "input": 249,
+                "output": 434
+              }
+            },
+            {
+              "route": "managed",
+              "state": "completed_with_checks",
+              "calls": 1,
+              "elapsedMs": 7772,
+              "usage": {
+                "input": 403,
+                "output": 996
+              },
+              "attention": [],
+              "units": 1,
+              "journalRevision": 5
+            }
+          ]
+        }
+      ],
+      "native": [
+        {
+          "scenario": "qa",
+          "preset": "standard",
+          "elapsedMs": 2990,
+          "noManagedTask": true,
+          "mainModelSteps": 1,
+          "usage": [
+            {
+              "inputTokens": 11002,
+              "outputTokens": 128,
+              "cacheReadTokens": 768,
+              "cacheWriteTokens": 0,
+              "totalTokens": 11898
+            }
+          ]
+        },
+        {
+          "scenario": "qa",
+          "preset": "long-context",
+          "elapsedMs": 3786,
+          "noManagedTask": true,
+          "mainModelSteps": 1,
+          "usage": [
+            {
+              "inputTokens": 9265,
+              "outputTokens": 2,
+              "cacheReadTokens": 512,
+              "cacheWriteTokens": 0,
+              "totalTokens": 9779
+            }
+          ]
+        },
+        {
+          "scenario": "inline-mapped",
+          "preset": "standard",
+          "elapsedMs": 6822,
+          "noManagedTask": true,
+          "mainModelSteps": 1,
+          "usage": [
+            {
+              "inputTokens": 10944,
+              "outputTokens": 520,
+              "cacheReadTokens": 1024,
+              "cacheWriteTokens": 0,
+              "totalTokens": 12488
+            }
+          ]
+        },
+        {
+          "scenario": "inline-mapped",
+          "preset": "long-context",
+          "elapsedMs": 4880,
+          "noManagedTask": true,
+          "mainModelSteps": 1,
+          "usage": [
+            {
+              "inputTokens": 9207,
+              "outputTokens": 343,
+              "cacheReadTokens": 768,
+              "cacheWriteTokens": 0,
+              "totalTokens": 10318
+            }
+          ]
+        }
+      ]
+    },
+    "nativeOutputBoundaryRetest": {
+      "provider": "deepseek-official",
+      "model": "deepseek-flash",
+      "parameters": {
+        "maxOutputTokens": 4096,
+        "temperature": 0,
+        "reasoningEffort": "route default",
+        "retries": 0
+      },
+      "verdict": "execution-passed-quality-unscored",
+      "credentialsUnchanged": true,
+      "rows": [],
+      "native": [
+        {
+          "scenario": "inline-mapped",
+          "preset": "standard",
+          "elapsedMs": 208078,
+          "noManagedTask": true,
+          "mainModelSteps": 1,
+          "metadataLeak": true,
+          "usage": [
+            {
+              "inputTokens": 11200,
+              "outputTokens": 4096,
+              "cacheReadTokens": 768,
+              "cacheWriteTokens": 0,
+              "totalTokens": 16064
+            }
+          ]
+        },
+        {
+          "scenario": "inline-mapped",
+          "preset": "long-context",
+          "elapsedMs": 5032,
+          "noManagedTask": true,
+          "mainModelSteps": 1,
+          "metadataLeak": false,
+          "usage": [
+            {
+              "inputTokens": 10026,
+              "outputTokens": 595,
+              "cacheReadTokens": 0,
+              "cacheWriteTokens": 0,
+              "totalTokens": 10621
+            }
+          ]
+        }
+      ]
+    },
+    "longAfterPromptSimplification": {
+      "provider": "deepseek-official",
+      "model": "deepseek-flash",
+      "parameters": {
+        "maxOutputTokens": 4096,
+        "temperature": 0,
+        "reasoningEffort": "route default",
+        "retries": 0
+      },
+      "verdict": "execution-passed-quality-unscored",
+      "credentialsUnchanged": true,
+      "rows": [
+        {
+          "id": "long-mapped",
+          "pair": [
+            {
+              "route": "direct",
+              "state": "returned",
+              "calls": 1,
+              "elapsedMs": 15190,
+              "usage": {
+                "input": 138,
+                "output": 3380
+              }
+            },
+            {
+              "route": "managed",
+              "state": "completed_with_checks",
+              "calls": 4,
+              "elapsedMs": 56301,
+              "usage": {
+                "input": 3078,
+                "output": 10806
+              },
+              "attention": [],
+              "units": 4,
+              "journalRevision": 11
+            }
+          ]
+        }
+      ],
+      "native": []
+    }
+  },
+  "review": {
+    "standards": "No hard standard violations; repeated source reads reduced with operation-local cache",
+    "spec": "Two P1 issues reproduced and fixed: synthesis citation loss and externally edited output during rendering; independent re-review closed both"
+  },
+  "limits": [
+    "Synthetic samples and one run per pair; no statistical speed or broad semantic quality claim",
+    "Managed execution remains slower than direct output in paired samples",
+    "Initial timeout, max-token and legacy failures retained in local records",
+    "No real user paper, live-provider overflow, full physical-page generation or all crash/HMR combinations",
+    "No npm publication or production-profile modification"
+  ],
+  "quality": {
+    "method": "Independent Codex review of anonymized outputs before opening route mapping; no statistical or expert-review claim",
+    "smallCases": "No critical omissions or unsupported changes found in successful mapped/synthesis/collection/dependency outputs",
+    "longSynthetic": "Ten repeated sections complete; numeric/condition review passed; minor extra blank lines at one batch boundary",
+    "failuresRetained": true
+  }
+}

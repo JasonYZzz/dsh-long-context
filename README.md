@@ -1,26 +1,51 @@
 # dsh-long-context
 
-面向 DSH `0.2.0-rc.2` 的长文档主题修改插件。当前提供实验性的文本编辑、组合检索及逐页生成核心：保存不可变原文、全文审查覆盖、影响项与依赖、候选稿、版本绑定验证及持久任务恢复。
+面向 DSH `0.2.0-rc.2` 的通用长上下文插件，当前版本 `0.4.0-beta.1`。当前会话模型根据目标、材料范围、依赖和交付要求选择处理方式；插件负责有界执行、准确来源、预算、增量保存、恢复和文件保护。
 
-已实现独立 `long-context` preset、23 个 `lc_*` 工具和 compaction 扩展。默认保留原稿，修改写入新候选文件；未完成覆盖、未解决依赖、陈旧版本和缺失检查会阻止 `lc_finish`。
+简单问答或材料已在上下文中的短请求可以直接回答。需要跨窗口处理、持久进度或受管文件时，使用 `lc_work` 建立最小约定并执行首批工作，之后用 `lc_continue` 继续。插件内部完成装配、所需检查与交付，不再默认要求扫描、计划、逐块复核和最后手动完成。
 
-当前支持 UTF-8 TXT、Markdown、单文件 LaTeX 的文本操作，以及原生文本 PDF 的证据提取与质量问题定位。已接入 Crossref 元数据分页和结构化全文导入；科学问题、滚动五年窗口、组参与证据、原文语言与 51 篇配额均有门槛。生成按 30–100 个逻辑单元推进，恢复前章摘要、准确原文和定义，配置本地 LibreOffice 后核对实际 PDF 页数和完整正文。
+没有翻译、总结等任务分类器，也没有额外 planner 调用。三种结果结构为连续内容、锚点修改、条目集合；综合允许多对一，短创作可以没有来源。引用、数量、日期和物理页数仅约束明确要求它们的任务。范围完整不等于语义正确，检查记录区分自检、会话提交和独立复核。
 
-版本 `0.3.0-beta.1` 仍为实验性预览：真实 51 篇检索、完整科学内容质量与全部优化计划尚未通过验收。中文全文不是 Crossref 自动提供；语言识别有保守词法限制。DOCX 原位写回、单文件 LaTeX 的受管编译、OCR、多文件 LaTeX、原 PDF 版面保留及生成任务与编辑任务的自动衔接均未交付。缺少编译器时 LaTeX 格式保持 `unknown`；缺少渲染器时逻辑页数不能被算作物理页数通过。
+实验版限制：支持 UTF-8 TXT、Markdown、单文件 LaTeX 文本和原生文本 PDF 提取；尚不支持 OCR、DOCX 原位写回、多文件 TeX、保留 PDF 原版式。缺少编译器时 LaTeX 仍不能通过格式验收；明确要求物理页数时必须配置并校准渲染器。真实长论文质量仍需专门评测。
 
-## Web 工作台（0.3.0-beta.1）
+## 使用
 
-现已提供原生 DSH Web 客户端。新建工作区会话选择 **Long Context**，发送首条消息创建会话后，点击会话标题栏的 **长文工作台**。文档、修改、检索、生成、任务五个页签直接调用当前会话的原生工具，可导入文档、创建及推进任务、显式接管恢复、导出报告。Standard 会话显示切换提示；不会自动更换已有会话的模式。
+新建工作区会话，选择 **Long Context**，直接描述目标。标题栏的 **长文工作台** 提供「材料」「处理请求」「任务」三个页签。「处理请求」把自然语言交给同一会话模型；不要求用户选择编辑、检索或生成流程。
 
-根包入口现在是 Web 插件；手动组合 headless preset 的调用方继续使用 `dsh-long-context/agent`、`/host`、`/compaction`，纯核心使用 `/core`。Web 入口必须以裸包名加入 bundle，才能由原生客户端模块发现。所有 DSH peer 精确锁定 `0.2.0-rc.2`；其他版本尚未验证。
+默认暴露 13 个 `lc_*` 工具及宿主提问工具，不暴露 shell、任意代码执行或委托能力。安装不会改变 Standard 或已有会话的 preset。
 
-本地安装、npm 发布准备和市场投稿见 [安装与发布说明](docs/WEB_INSTALLATION_AND_RELEASE.zh.md)，实际 3080 验收见 [Web 部署报告](docs/WEB_DEPLOYMENT_REPORT.zh.md)。本轮按用户要求暂不发布 npm 或提交市场 PR。
+核心工具：
 
-![实际 DSH Web 工作台中的合成验收任务](docs/assets/web-workbench.png)
+- `lc_import / lc_inspect / lc_read / lc_search`：导入、准确读取和发现材料。普通读取不产生任务 journal；`lc_read` 返回可核验的阅读凭证。
+- `lc_work / lc_continue`：执行有界批次；回执含最新 `journalRevision`、进度、产物和下一步，正常继续无需先查询状态。
+- `lc_status / lc_task_detail / lc_result_read`：短状态与完整详情分开；大文本可以续读。
+- `lc_discover`：有界 Crossref 元数据分页，不代表通用互联网搜索或正文证据。
+- `lc_resume / lc_rollback / lc_export_report`：恢复、显式接管、候选回退和报告。新通用任务报告为 JSON；旧任务仍支持原 Markdown 报告。
 
-## 开发与验证
+例如无来源短创作：
 
-要求 Node.js ≥22.13、pnpm 11.1.2；本机验证使用 Node.js 24.19.0。DSH 与 Cordis 使用锁定版本，采用 hoisted 依赖布局。
+```json
+{
+  "contract": {
+    "request": "写一段介绍这份操作手册用途的文字",
+    "output": {"kind": "segments", "path": "introduction.md"}
+  },
+  "requestId": "intro-1",
+  "expectedLedgerRevision": 0
+}
+```
+
+全文处理通过 `contract.sources: [{revisionId}]` 声明完整范围。模型可以提供语义 `units`，或采用有界默认切分；存储块不决定调用粒度。准确字面替换使用 `output.kind: "patches"` 与 `exactReplacements: [{from,to}]`，无需辅助模型。
+
+主模型已经完成的内容可通过 `preparedResults` 提交，复用真实 `lc_read` 凭证，避免辅助模型再次生成。锚点修改应复用已提供的准确 anchor；更细位置先准确读取，不能猜测 SHA。产出调用包含目标自检，`review: "all"` 或指定 `reviewUnitIds` 才追加所需独立检查，已有义务不能取消。
+
+原请求、来源范围和预算冻结。可重分待处理单元、增加依据与检查、修订指令并使实际依赖失效；改变目标或来源时明确结束旧任务并建立新约定，第一版不提供任意约定原位修改。相同 `requestId` 与参数重放不会重复有效提交；远端请求结果未知时保守记账，不承诺 provider 只收费一次。
+
+输出写入新文件，不覆盖原稿。旧候选回退保留原语义；通用锚点修改的回退恢复基线**文本投影**到受管候选，不会把 PDF 原始字节写入文本候选。产物、提示和审计保存在工作区 `.dsh-long-context/`，包含材料正文，不应提交公共仓库。
+
+## 构建、安装与验证
+
+要求 Node.js ≥22.13、pnpm 11.1.2，DSH peer 精确锁定 `0.2.0-rc.2`。
 
 ```sh
 pnpm install --frozen-lockfile
@@ -32,69 +57,44 @@ pnpm pack --pack-destination .acceptance
 pnpm acceptance:preflight
 pnpm acceptance:web:rc2
 pnpm acceptance:mechanisms:rc2
+dsh plugin --profile my-web-profile add /absolute/path/dsh-long-context-0.4.0-beta.1.tgz
 ```
 
-集成测试会在仓库 `.acceptance/native/dsh-home-v2` 建立独立 profile 并安装本次 tgz，不改变用户原有 DSH home。机制测试使用本地受控 provider，验证实际 DSH 请求中的 checkpoint、压力压缩、手动压缩、overflow 重试及压缩后的文本编辑闭环；这些结果不代表真实模型的语义质量。
+重启目标 profile 后新建 Long Context 会话。根包提供 Web 入口，headless 组合使用 `/agent`、`/host`、`/compaction` 与 `bundle/headless.patch.yml`；纯核心使用 `/core`。卸载用 `dsh plugin --profile my-web-profile remove dsh-long-context`，账本默认保留。
 
-真实模型测试需另行配置已授权的隔离 headless profile：
+集成在 `.acceptance/project/` 或 `.acceptance/native/` 的独立 DSH home 安装实际 tgz。机制测试使用受控 provider，不能替代真实模型质量。默认允许下载锁定依赖；缓存完整时可设置 `LC_INSTALL_OFFLINE=1`。
 
 ```sh
-LC_MODEL_PROFILE=my-authorized-test-profile pnpm acceptance:model:rc2 /absolute/path/task.txt
+pnpm evaluate:general-performance
+pnpm evaluate:general-model
 ```
 
-缺少测试 profile 或任务文件时，该命令记录 `not-run` 并以状态码 2 退出，不复制用户原 home 的密钥。
+性能脚本从 Git 基线 `a731f9c` 提取源码，在同机核对 6,000 次替换及完整恢复；不会删除审计换取空间。真实模型脚本使用已授权的 Web 配置和已存凭证引用；未显式覆盖时采用原生 `deepseek-official/deepseek-flash`，凭证仅传入隔离进程环境，不写入测试补丁。只有用户授权时才运行；原凭证文件在结束时核对未变。输出、盲评文件和完整本地调用记录位于被 Git 忽略的 `evaluation/runs/`。
 
-## 安装与使用
+旧版 `acceptance:model:rc2` 仍可用 `LC_MODEL_PROFILE` 指定独立认证 profile。所有未知、未运行和失败结果必须保留，不能以受控通过宣称真实质量。
 
-构建打包后，将 tgz 安装到目标 Web profile：
+## 旧任务与存储迁移
+
+旧扫描、研究和逐页生成工具仅用于兼容原任务；默认新会话不展示。`lc_resume` 或恢复旧任务的检查点会在该会话注册兼容工具。旧客户端需要主动创建旧任务时，可显式配置 Host `legacyTools: true`；旧页数、引用和配额门槛不会自动放宽，也不会被标为新协议语义验收。
+
+新 workspace 使用 v3 增量事件。已有 v2 workspace 可继续原接口恢复旧任务；开始新通用任务前必须显式升级。先停止该 workspace 的所有旧写入并备份，再在本源码仓库执行（安装包可调用下文的核心导出）：
 
 ```sh
-dsh plugin --profile my-web-profile add /absolute/path/dsh-long-context-0.3.0-beta.1.tgz
+node scripts/migrate-state.mjs /absolute/workspace .dsh-long-context --to-v3
+node scripts/migrate-state.mjs /absolute/workspace .dsh-long-context --rollback-v3
 ```
 
-重启相应 Web profile，在新会话中选择 **Long Context**。该 preset 只提供文档任务工具与提问工具，不暴露终端、任意代码执行和委托工具。安装不会将它设置为 standard 或所有会话的默认预设。
+迁移复制到新 generation、完整核验，再原子切换 manifest；保留旧 journal、owner、requestId 和检查语义。回退只恢复旧 generation 指针，不逆向转换新数据；新 generation 和产物仍保留，配合旧插件使用，不能把旧状态当最新完整数据。v1 先用原 `migrate-state.mjs` 无参数升级到 v2。核心也导出 `migrateV1 / migrateV2 / rollbackV2`。
 
-基本流程：`lc_import` → `lc_task_start` → 重复 `lc_scan_next` → `lc_impact_review` → `lc_plan` → `lc_apply` → 逐块 `lc_verify` → `lc_finish` → `lc_export_report`。使用 `lc_inspect` 获取块定位，使用 `lc_read` 的 `nextCursor` 完整续读；写工具携带最新 `expectedLedgerRevision` 和稳定的 `requestId`。
+Host 可配置 `auxiliaryModel: {provider, model, reasoningEffort, maxOutputTokens, deadlineMs}`、`rendererExecutable`、`rendererFontconfigFile`。默认沿用会话 route，不强制关闭推理。模型等待与渲染在工作区锁外，短事务保留 owner、CAS、取消令牌、文件 hash 与预算检查。
 
-- `lc_status` 分页查看权威账本；搜索命中不能代替全文审查。
-- `taskType: exact` 按冻结的字面替换目标独立核对整篇，模型调用为 0；语义修改可通过 `rootChanges` 指定必须落地的词或段落。
-- 扫描与复核沿用当前 DSH 模型 route；失败范围保持未完成，调用有重试和预算限制。
-- `lc_resume` 从账本恢复；跨会话接管需要显式 `transferOwner`，fork 不自动获得写权。
-- `lc_rollback` 在 hash/version 校验后将基线恢复到插件管理的候选文件，保留原稿。
-- headless 组合使用 `bundle/headless.patch.yml`，不与默认 compaction provider 重复加载。
+## 实施依据与证据
 
-卸载：`dsh plugin --profile my-web-profile remove dsh-long-context`。卸载解除插件配置，默认保留工作区 `.dsh-long-context/` 中的任务数据；需清理时先自行备份与确认范围。该目录包含原文和模型请求内容，不应提交到公共仓库。
-
-## 检索、生成与迁移
-
-检索流程：`lc_research_start` → `lc_research_next` 联网召回 → `lc_research_import` 导入 JSON 书目与已导入正文 → 逐窗口 `lc_research_next` → `lc_research_finish`。Paper 输入包括 title、authors、published（首次公开日期）、sourceUrl、revisionId，DOI/arXiv 标识可选。每篇需 `participationEvidence`，它是连接论文、作者与准确组名的证据 anchor；只有同名作者或同机构不能通过。已知更早 arXiv 版本会排除；未知首次公开日期仍需人工核查。元数据、中文摘要或翻译不能替代原始中文正文。自行导入译文且未提供原稿时，当前算法无法自动鉴定翻译来源，原文语言必须人工核查。
-
-生成流程：`lc_generate_start` 提供 title、pages、每个逻辑单元一个 outline 目标、revisionIds 和 definitions → 重复 `lc_generate_next` → `lc_generate_finish`。独立复核只检查当前单元并绑定准确证据编号。失败页与错误反馈保留，`lc_resume` 后可修订；新工作流的调用、token、墙钟预算冻结在账本。每个逻辑单元不足 400 个有效文字/数字/符号时不能靠分页通过；这只是内容量保护，仍需要科学质量审阅。`lc_generate_revise` 接收新 definitions、可选 revisionIds，保留旧 journal 与产物，撤销全部依赖单元后重生成。自动父子编辑联动尚未实现。
-
-Host 配置可选 `auxiliaryModel: {provider, model, reasoningEffort, maxOutputTokens, deadlineMs}`、`rendererExecutable` 和 `rendererFontconfigFile`。推理档位须由当前模型支持；渲染器和字体必须在部署机器上完成校准。测试使用了显式配置的 LibreOfficeDev，本包不捆绑或自动安装渲染器。PDF 存放于私有账本 artifacts，可编辑源写入受管候选路径；文档工具禁止读写账本内部路径。
-
-schema v1 不能被 v2 运行时直接写入。先停用相关 workspace 的旧服务、备份原文与候选，然后执行：
-
-```sh
-node scripts/migrate-state.mjs /absolute/workspace .dsh-long-context
-node scripts/migrate-state.mjs /absolute/workspace .dsh-long-context --rollback
-```
-
-迁移采用新 generation，保留旧 journal、owner 与幂等回执；旧完成任务显示为 legacy_checks。回退只恢复 v1 指针，v2 数据保留，需配合旧插件版本使用；刷新 `lc_status` 获取迁移后的 CAS。脚本位于源码仓库，打包版本同时从 `dsh-long-context/core` 导出 migrateV1/rollbackMigration。
-
-## 评测与文档
-
-`pnpm evaluate:fixtures` 生成 10 份各 100 页的固定文本样本，原文在隔离工作区，gold 在 `evaluation/gold/`，不能把 gold 提供给模型。`evaluate:gold` 对指定原稿和候选稿评分，`evaluate:report` 汇总任务成功率和置信区间。没有实际运行的指标保持未知。
-
-完整运行证据位于本地 `evaluation/runs/`，依赖、测试数据、运行请求、打包产物与缓存均被 Git 忽略。发布包仅包含编译代码、bundle、文档和许可证，不包含论文或测试运行记录。
-
-- [优化执行报告与剩余事项](docs/OPTIMIZATION_EXECUTION_REPORT.zh.md)
-- [测评后的完整优化实施计划](docs/OPTIMIZATION_IMPLEMENTATION_PLAN.zh.md)
-- [插件测评报告及优化建议](docs/PLUGIN_EVALUATION.zh.md)
-- [开发状态及当前限制](docs/DEVELOPMENT_STATUS.zh.md)
-- [完整实施计划](docs/IMPLEMENTATION_PLAN.zh.md)
-- [本机实际验收计划](docs/ACCEPTANCE_PLAN.zh.md)
-- [DSH 兼容基线](docs/DSH_COMPATIBILITY.zh.md)
+- [通用优化实施计划](docs/GENERAL_OPTIMIZATION_IMPLEMENTATION_PLAN.zh.md)
+- [通用优化执行报告](docs/GENERAL_OPTIMIZATION_EXECUTION_REPORT.zh.md)
 - [领域术语](CONTEXT.md)
+- [DSH 兼容基线](docs/DSH_COMPATIBILITY.zh.md)
+- [旧版安装及发布说明](docs/WEB_INSTALLATION_AND_RELEASE.zh.md)
+- [历史优化报告](docs/OPTIMIZATION_EXECUTION_REPORT.zh.md)
 
-补充验收：`pnpm evaluate:relevance` 使用当前授权的模型路由审阅真实论文可读文字；`pnpm evaluate:performance` 测合成密集文本与输入上限，分隔单元不等于物理页数。`pnpm evaluate:optimization-report` 汇总本机运行结果；先构建并完成对应验收，禁止将未执行项写为通过。
+npm 和市场尚未发布。本轮本地打包、隔离安装与真实模型评测不改变用户的默认 profile。

@@ -3,6 +3,7 @@ export const auxiliaryModelSchema=z.object({provider:z.string().min(1).optional(
 export const configSchema=z.object({
   rendererExecutable:z.string().min(1).optional(),rendererFontconfigFile:z.string().min(1).optional(),
   auxiliaryModel:auxiliaryModelSchema.default({}),
+  legacyTools:z.boolean().default(false),
   stateRoot:z.string().min(1).default('.dsh-long-context'), mode:z.enum(['strict','advisory']).default('strict'),
   blockTargetCodePoints:z.number().int().min(128).max(6000).default(4000), blockMaxCodePoints:z.number().int().min(128).max(12000).default(6000),
   maxEvidenceCodePoints:z.number().int().min(1000).max(100000).default(48000),

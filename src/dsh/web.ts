@@ -1,32 +1,42 @@
 import type {Context} from '@deepseek-ai/cordis';
 import {SessionId} from '@deepseek-ai/dsh-session';
-import {ToolCallId} from '@deepseek-ai/dsh-llm';
+import {ToolCallId,createUserMessage} from '@deepseek-ai/dsh-llm';
 import type {} from '@deepseek-ai/dsh-client-connection';
 import type {} from '@deepseek-ai/dsh-agent';
 import {z} from 'zod';
 import {LcError,invariant} from '../core/errors.js';
+import {managedSchema} from '../core/tasks/types.js';
+import {canonical,hash} from '../core/util.js';
 import './host.js';
 export const name='long-context-web';
 export const inject=['longContext','connection','agents','agentPresets'];
 const inputSchema=z.discriminatedUnion('action',[
   z.object({action:z.literal('snapshot'),sessionId:z.string().min(1)}).strict(),
+  z.object({action:z.literal('request'),sessionId:z.string().min(1),requestId:z.string().uuid(),request:z.string().min(1).max(12000),revisionId:z.string().optional(),outputPath:z.string().optional()}).strict(),
   z.object({action:z.literal('execute'),sessionId:z.string().min(1),tool:z.string().regex(/^lc_[a-z_]+$/),arguments:z.record(z.string(),z.unknown())}).strict()
 ]);
 /** Authentication and Host/Origin admission are provided by the native Connection route. */
-export function createWebHandler(ctx:Context){return async(request:Request):Promise<Response>=>{
+export function createWebHandler(ctx:Context){const queued=new Map<string,{fingerprint:string;messageId:string}>();return async(request:Request):Promise<Response>=>{
   try{
     invariant(request.method==='POST','LC_INVALID_ARGUMENT','Use POST');const raw=await request.text();invariant(Buffer.byteLength(raw)<=65536,'LC_BUDGET_EXCEEDED','Request exceeds 64 KiB');const input=inputSchema.parse(JSON.parse(raw));
     const agent=ctx.agents.get(SessionId(input.sessionId));invariant(agent&&agent.session.id===input.sessionId,'LC_INVALID_ARGUMENT','请先打开或恢复此会话');
     const enabled=ctx.agentPresets.composedPreset(agent.ctx)==='long-context';
     if(input.action==='snapshot'){
-      if(!enabled)return Response.json({enabled:false,version:'0.3.0-beta.1',message:'请新建工作区会话并选择 Long Context 模式。已有 standard 会话保持原模式。'},{headers:{'Cache-Control':'no-store'}});
+      if(!enabled)return Response.json({enabled:false,version:'0.4.0-beta.1',message:'请新建工作区会话并选择 Long Context 模式。已有 standard 会话保持原模式。'},{headers:{'Cache-Control':'no-store'}});
       const engine=await ctx.longContext.engine(agent.ctx,agent),store=engine.store,documents=[];
       for(const id of (await store.documentIds()).slice(-30)){const d=await store.document(id);documents.push({revisionId:id,path:d.path,format:d.format,pages:d.pages,length:d.length,qualityIssueCount:d.qualityIssues.length});}
-      const tasks=[];for(const id of (await store.taskIds()).slice(-30)){const t=await store.task(id);if(t)tasks.push({taskId:id,kind:'edit',state:t.state,journalRevision:t.journalRevision,owned:t.ownerSession===agent.session.id,goal:t.goal.request,calls:t.calls,tokens:t.tokens,attention:t.attention,candidate:t.candidate,planId:t.plan?.planId??null});}
-      for(const id of (await store.workflowIds()).slice(-30)){const t=await store.workflow(id);if(t)tasks.push({taskId:id,kind:t.taskKind,state:t.state,journalRevision:t.journalRevision,owned:t.ownerSession===agent.session.id,goal:t.taskKind==='generation'?t.goal.title:t.query.question,calls:t.calls,tokens:t.tokens,attention:t.attention,logicalPages:t.taskKind==='generation'?t.units.length:null,targetPages:t.taskKind==='generation'?t.goal.pages:null,candidate:t.taskKind==='generation'?t.candidate:null});}
-      return Response.json({enabled:true,version:'0.3.0-beta.1',workspace:agent.session.header.cwd,busy:agent.status==='running',documents,tasks,limit:'最多显示30份文档、30个编辑任务和30个检索/生成任务；完整记录请导出任务报告。'},{headers:{'Cache-Control':'no-store'}});
+      const tasks=[];for(const id of (await store.taskIds()).slice(-30)){const t=await store.task(id,false);if(t)tasks.push({taskId:id,kind:'edit',state:t.state,journalRevision:t.journalRevision,owned:t.ownerSession===agent.session.id,goal:t.goal.request,calls:t.calls,tokens:t.tokens,attention:t.attention,candidate:t.candidate,planId:t.plan?.planId??null});}
+      for(const id of (await store.workflowIds()).slice(-30)){const t=await store.workflow(id,false);if(t)tasks.push({taskId:id,kind:t.taskKind,state:t.state,journalRevision:t.journalRevision,owned:t.ownerSession===agent.session.id,goal:t.taskKind==='generation'?t.goal.title:t.query.question,calls:t.calls,tokens:t.tokens,attention:t.attention,logicalPages:t.taskKind==='generation'?t.units.length:null,targetPages:t.taskKind==='generation'?t.goal.pages:null,candidate:t.taskKind==='generation'?t.candidate:null});}
+      for(const id of (await store.recordIds('managed')).slice(-30)){const t=await store.record('managed',id,managedSchema,false);if(t)tasks.push({taskId:id,kind:'managed',state:t.state,journalRevision:t.journalRevision,owned:t.ownerSession===agent.session.id,goal:t.contract.request,calls:t.calls,tokens:t.tokens,attention:t.attention,candidate:t.artifact,produced:t.units.filter(u=>u.contentHash&&t.checks.some(c=>c.passed&&['self','session','deterministic'].includes(c.method)&&c.unitIds.includes(u.unitId)&&c.outputHashes.includes(u.contentHash!))).length,total:t.units.length});}
+      tasks.sort((a,b)=>b.taskId.localeCompare(a.taskId));return Response.json({enabled:true,version:'0.4.0-beta.1',workspace:agent.session.header.cwd,busy:agent.status==='running',documents,tasks,limit:'每类最多显示30个任务与30份文档；检查方法、覆盖范围和完整记录可在任务详情及报告中查看。'},{headers:{'Cache-Control':'no-store'}});
     }
     invariant(enabled,'LC_PERMISSION_DENIED','请使用 Long Context 模式');
+    if(input.action==='request'){
+      const key=agent.session.id+'/'+input.requestId,fingerprint=hash(canonical(input)),prior=queued.get(key);if(prior){invariant(prior.fingerprint===fingerprint,'LC_REQUEST_CONFLICT','请求编号已用于其他内容');return Response.json({ok:true,data:{queued:true,messageId:prior.messageId}},{status:202});}
+      let material='';if(input.revisionId){const engine=await ctx.longContext.engine(agent.ctx,agent),doc=await engine.store.document(input.revisionId);await engine.options.files.read(doc.path,request.signal);material=`\n\n已导入材料：${canonical({revisionId:doc.revisionId,path:doc.path})}`;}
+      const output=input.outputPath?`\n\n请求保存位置：${input.outputPath}`:'';
+      const message=createUserMessage({source:{kind:'user'},content:[{type:'text',text:input.request+material+output}]});agent.followup(message);queued.set(key,{fingerprint,messageId:message.id});if(queued.size>200)queued.delete(queued.keys().next().value!);return Response.json({ok:true,data:{queued:true,messageId:message.id}},{status:202});
+    }
     invariant(agent.ctx.tools.schemas(agent).some(t=>t.name===input.tool),'LC_PERMISSION_DENIED','Tool is unavailable in this session');
     const data=await agent.runMaintenance(async signal=>agent.ctx.tools.execute({callId:ToolCallId(`web-${crypto.randomUUID()}`),name:input.tool,arguments:input.arguments,agent,signal:AbortSignal.any([signal,request.signal])}));
     if(data.isError)throw new LcError('LC_INVALID_ARGUMENT','工具执行失败，请检查会话与参数');return Response.json(data.value,{headers:{'Cache-Control':'no-store'}});
